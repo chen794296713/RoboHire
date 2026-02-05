@@ -26,6 +26,23 @@ interface ChatRequestBody {
   };
 }
 
+interface HiringSessionMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+interface HiringSessionRecord {
+  id: string;
+  userId: string;
+  title: string | null;
+  messages: HiringSessionMessage[];
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const MAX_HISTORY_MESSAGES = 16;
 const MAX_JOB_DESCRIPTION_CHARS = 6000;
 
@@ -45,7 +62,7 @@ router.post('/', optionalAuth, async (req, res) => {
       });
     }
 
-    let session = null;
+    let session: HiringSessionRecord | null = null;
     const userId = req.user?.id;
 
     if (sessionId) {
@@ -57,9 +74,21 @@ router.post('/', optionalAuth, async (req, res) => {
         });
       }
 
-      session = await prisma.hiringSession.findFirst({
+      const foundSession = await prisma.hiringSession.findFirst({
         where: { id: sessionId, userId },
       });
+
+      if (foundSession) {
+        session = {
+          id: foundSession.id,
+          userId: foundSession.userId,
+          title: foundSession.title,
+          messages: (foundSession.messages as unknown as HiringSessionMessage[]) || [],
+          status: foundSession.status,
+          createdAt: foundSession.createdAt,
+          updatedAt: foundSession.updatedAt,
+        };
+      }
 
       if (!session) {
         logger.endRequest(requestId, 'error', 404);
@@ -78,7 +107,7 @@ router.post('/', optionalAuth, async (req, res) => {
       timestamp,
     };
 
-    const existingMessages = session ? ((session.messages as any[]) || []) : [];
+    const existingMessages = session ? session.messages : [];
     const mergedMessages = session ? [...existingMessages, userMessage] : existingMessages;
 
     if (session) {
@@ -86,7 +115,7 @@ router.post('/', optionalAuth, async (req, res) => {
       await prisma.hiringSession.update({
         where: { id: session.id },
         data: {
-          messages: mergedMessages,
+          messages: mergedMessages as unknown as import('@prisma/client').Prisma.InputJsonValue,
           title: updatedTitle,
         },
       });
@@ -132,7 +161,7 @@ router.post('/', optionalAuth, async (req, res) => {
       await prisma.hiringSession.update({
         where: { id: session.id },
         data: {
-          messages: [...mergedMessages, assistantMessage],
+          messages: [...mergedMessages, assistantMessage] as unknown as import('@prisma/client').Prisma.InputJsonValue,
         },
       });
     }

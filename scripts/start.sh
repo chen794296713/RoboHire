@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# RoboHire API - Start All Services Script
+# GoHire API - Start All Services Script
 
 set -e
 
@@ -14,7 +14,7 @@ BACKEND_PORT=4607
 FRONTEND_PORT=3607
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║           RoboHire API - Start All Services                  ║${NC}"
+echo -e "${BLUE}║           GoHire API - Start All Services                  ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 

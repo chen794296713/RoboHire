@@ -1,5 +1,5 @@
 {
-  "name": "robohire-api",
+  "name": "gohire-api",
   "version": "1.0.0",
   "description": "AI-Powered Recruitment APIs",
   "private": true,
@@ -20,6 +20,8 @@
     "services:restart": "./scripts/restart.sh"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.27.2",
+    "typescript": "^5.6.2"
   }
 }
