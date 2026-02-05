@@ -63,7 +63,7 @@ COPY backend/ ./
 RUN npm run build
 
 # 生产阶段 - 同时运行前端和后端
-FROM harbor.lightark.cc/image-base/node:18.20.5-alpine
+FROM harbor.lightark.cc/infra/node:22.15-bookworm-slim 
 
 # 元数据
 LABEL build_date="${BUILD_DATE}"
