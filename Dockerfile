@@ -2,7 +2,7 @@
 ARG BUILD_DATE=latest
 
 # 构建阶段 - 构建前端
-FROM  harbor.lightark.cc/infra/node:22.15-bookworm-slim as frontend-build
+FROM  harbor.lightark.cc/image-base/node:18.20.5-alpine as frontend-build
 
 WORKDIR /app
 
@@ -31,7 +31,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # 构建阶段 - 构建后端
-FROM harbor.lightark.cc/infra/node:22.15-bookworm-slim as backend-build
+FROM harbor.lightark.cc/image-base/node:18.20.5-alpine as backend-build
 
 WORKDIR /app
 
@@ -63,7 +63,7 @@ COPY backend/ ./
 RUN npm run build
 
 # 生产阶段 - 同时运行前端和后端
-FROM harbor.lightark.cc/infra/node:22.15-bookworm-slim 
+FROM harbor.lightark.cc/image-base/node:18.20.5-alpine
 
 # 元数据
 LABEL build_date="${BUILD_DATE}"
