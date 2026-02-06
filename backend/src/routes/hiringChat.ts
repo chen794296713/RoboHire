@@ -48,6 +48,14 @@ interface HiringSessionRecord {
 const MAX_HISTORY_MESSAGES = 16;
 const MAX_JOB_DESCRIPTION_CHARS = 6000;
 
+// Helper function to safely parse messages from Prisma JsonValue
+function parseMessages(messages: unknown): HiringSessionMessage[] {
+  if (!Array.isArray(messages)) {
+    return [];
+  }
+  return messages as HiringSessionMessage[];
+}
+
 router.post('/', optionalAuth, async (req, res) => {
   const requestId = generateRequestId();
   logger.startRequest(requestId, '/api/v1/hiring-chat', 'POST');
@@ -64,7 +72,7 @@ router.post('/', optionalAuth, async (req, res) => {
       });
     }
 
-    let session: HiringSession | null = null;
+    let session: HiringSessionRecord | null = null;
     const userId = req.user?.id;
 
     if (sessionId) {
@@ -85,7 +93,7 @@ router.post('/', optionalAuth, async (req, res) => {
           id: foundSession.id,
           userId: foundSession.userId,
           title: foundSession.title,
-          messages: (foundSession.messages as unknown as HiringSessionMessage[]) || [],
+          messages: parseMessages(foundSession.messages),
           status: foundSession.status,
           createdAt: foundSession.createdAt,
           updatedAt: foundSession.updatedAt,
@@ -102,15 +110,17 @@ router.post('/', optionalAuth, async (req, res) => {
     }
 
     const timestamp = new Date().toISOString();
-    const userMessage = {
+    const userMessage: HiringSessionMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      role: 'user' as const,
+      role: 'user',
       content: trimmedMessage,
       timestamp,
     };
 
-    const existingMessages = session ? session.messages : [];
-    const mergedMessages = session ? [...existingMessages, userMessage] : existingMessages;
+    const existingMessages: HiringSessionMessage[] = session?.messages ?? [];
+    const mergedMessages: HiringSessionMessage[] = session
+      ? [...existingMessages, userMessage]
+      : existingMessages;
 
     if (session) {
       const updatedTitle = session.title || trimmedMessage.substring(0, 50) + (trimmedMessage.length > 50 ? '...' : '');
@@ -133,8 +143,10 @@ router.post('/', optionalAuth, async (req, res) => {
       hasSession: Boolean(session),
     }, requestId);
 
-    const historyMessages: Message[] = (session ? mergedMessages : (history || []))
-      .filter((entry) => entry && (entry.role === 'user' || entry.role === 'assistant') && typeof entry.content === 'string')
+    const sourceMessages: HiringSessionMessage[] = session ? mergedMessages : (history ?? []) as HiringSessionMessage[];
+    const historyMessages: Message[] = sourceMessages
+      .filter((entry): entry is HiringSessionMessage =>
+        entry != null && (entry.role === 'user' || entry.role === 'assistant') && typeof entry.content === 'string')
       .slice(-MAX_HISTORY_MESSAGES)
       .map((entry) => ({ role: entry.role, content: entry.content }));
 
@@ -152,18 +164,19 @@ router.post('/', optionalAuth, async (req, res) => {
       requestId,
     });
 
-    const assistantMessage = {
+    const assistantMessage: HiringSessionMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      role: 'assistant' as const,
+      role: 'assistant',
       content: reply,
       timestamp: new Date().toISOString(),
     };
 
     if (session) {
+      const finalMessages: HiringSessionMessage[] = [...mergedMessages, assistantMessage];
       await prisma.hiringSession.update({
         where: { id: session.id },
         data: {
-          messages: [...mergedMessages, assistantMessage] as unknown as import('@prisma/client').Prisma.InputJsonValue,
+          messages: finalMessages as unknown as import('@prisma/client').Prisma.InputJsonValue,
         },
       });
     }
