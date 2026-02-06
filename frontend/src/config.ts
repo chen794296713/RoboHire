@@ -13,3 +13,4 @@ export const API_BASE: string =
 // UI Configuration - Control visibility of UI elements
 // Set VITE_OAUTH_ENABLED=false to hide OAuth login buttons
 export const OAUTH_ENABLED = false;
+export const ICP_ENABLED = false;
