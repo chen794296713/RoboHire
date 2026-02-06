@@ -47,6 +47,10 @@ check_nginx_alive() {
     if ! pgrep -x nginx > /dev/null 2>&1; then
         return 1
     fi
+    # 检查端口是否监听
+    if ! check_port_listening ${NGINX_PORT}; then
+        return 1
+    fi
     return 0
 }
 
@@ -114,10 +118,10 @@ restart_nginx() {
 
     nginx -g "daemon on;"
 
-    # 等待启动
+    # 等待启动并检查端口
     for i in {1..5}; do
-        if pgrep -x nginx > /dev/null 2>&1; then
-            log "✅ nginx 已重启"
+        if pgrep -x nginx > /dev/null 2>&1 && check_port_listening ${NGINX_PORT}; then
+            log "✅ nginx 已重启 (端口 ${NGINX_PORT} 已监听)"
             return 0
         fi
         sleep 1
