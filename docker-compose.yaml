@@ -15,6 +15,7 @@ services:
       - "33607:80"
       - "34607:4607"
     volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
       - ./logs/roboHire-api:/app/logs
       - ./api_data:/data
     restart: unless-stopped
