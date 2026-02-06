@@ -27,7 +27,7 @@ NC='\033[0m'
 # Git 配置区
 # =============================================================================
 BRANCH="main"
-GITLAB_REPO="https://gitlab.lightark.cc/lightark-product/robohire.git"
+GITLAB_REPO="https://gitlab.lightark.cc/lightark-product/RoboHire.git"
 
 # =============================================================================
 # 服务器部署配置区
