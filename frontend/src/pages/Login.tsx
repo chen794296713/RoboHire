@@ -2,14 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE } from '../config';
+import { API_BASE, OAUTH_ENABLED } from '../config';
 import SEO from '../components/SEO';
 import LanguageSelector from '../components/LanguageSelector';
 
-// OAuth configuration from environment variables
-// Set VITE_OAUTH_ENABLED=false in .env.local to hide all OAuth login buttons
-
-const OAUTH_ENABLED =  false;
 type AuthMode = 'login' | 'signup';
 
 export default function Login() {

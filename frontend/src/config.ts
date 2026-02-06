@@ -9,3 +9,7 @@
  */
 export const API_BASE: string =
   import.meta.env.VITE_API_URL || '';
+
+// UI Configuration - Control visibility of UI elements
+// Set VITE_OAUTH_ENABLED=false to hide OAuth login buttons
+export const OAUTH_ENABLED = false;
