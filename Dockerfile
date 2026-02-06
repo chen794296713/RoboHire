@@ -69,7 +69,7 @@ FROM harbor.lightark.cc/image-base/node:18.20.5-alpine
 LABEL build_date="${BUILD_DATE}"
 
 # 安装 nginx（用于前端服务）
-RUN apk add --no-cache nginx bash curl
+RUN apk add --no-cache nginx bash curl psmisc
 
 # 创建必要的目录
 RUN mkdir -p /app/logs /app/backend/logs /run/nginx

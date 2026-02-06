@@ -178,16 +178,32 @@ check_port_listening() {
     return 1
 }
 
+# 停止占用端口的进程
+kill_port_process() {
+    local port=$1
+    log "检查端口 ${port} 占用情况..."
+
+    # 使用 fuser 杀死占用端口的进程
+    if command -v fuser &> /dev/null; then
+        fuser -k ${port}/tcp 2>/dev/null || true
+        sleep 2
+    fi
+
+    # 确保 nginx 完全停止
+    pkill -9 -x nginx 2>/dev/null || true
+    sleep 2
+}
+
 # 启动 nginx
 start_nginx() {
     log "[2/2] 启动 nginx on port ${NGINX_PORT}..."
 
-    # 先检查是否已有 nginx 运行
-    if pgrep -x nginx > /dev/null 2>&1; then
-        log "⚠️  nginx 已在运行，先停止..."
-        pkill -x nginx 2>/dev/null || true
-        sleep 2
-    fi
+    # 停止任何占用端口的进程
+    kill_port_process ${NGINX_PORT}
+
+    # 再次确认 nginx 已停止
+    pkill -9 -x nginx 2>/dev/null || true
+    sleep 1
 
     # 测试 nginx 配置
     log "测试 nginx 配置..."
