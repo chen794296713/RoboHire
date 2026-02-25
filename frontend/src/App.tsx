@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { FormDataProvider } from './context/FormDataContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import GlobalFooter from './components/GlobalFooter';
 
 // Public Pages
 import Landing from './pages/Landing';
@@ -73,36 +72,34 @@ function App() {
             <Route path="usage" element={<UsageDashboard />} />
           </Route>
 
-            {/* API Playground Routes (Public) */}
-            <Route path="/api-playground" element={<APIPlayground />}>
-              <Route index element={<Navigate to="match-resume" replace />} />
-              <Route path="match-resume" element={<MatchResume />} />
-              <Route path="invite" element={<InviteCandidate />} />
-              <Route path="parse-resume" element={<ParseResume />} />
-              <Route path="parse-jd" element={<ParseJD />} />
-              <Route path="evaluate" element={<EvaluateInterview />} />
-            </Route>
+          {/* API Playground Routes (Public) */}
+          <Route path="/api-playground" element={<APIPlayground />}>
+            <Route index element={<Navigate to="match-resume" replace />} />
+            <Route path="match-resume" element={<MatchResume />} />
+            <Route path="invite" element={<InviteCandidate />} />
+            <Route path="parse-resume" element={<ParseResume />} />
+            <Route path="parse-jd" element={<ParseJD />} />
+            <Route path="evaluate" element={<EvaluateInterview />} />
+          </Route>
 
-            {/* Documentation Routes (Public) */}
-            <Route path="/docs" element={<DocsLayout />}>
-              <Route index element={<Navigate to="overview" replace />} />
-              <Route path="overview" element={<DocsOverview />} />
-              <Route path="quick-start" element={<DocsQuickStart />} />
-              <Route path="authentication" element={<DocsAuthentication />} />
-              <Route path="api/match-resume" element={<DocsMatchResume />} />
-              <Route path="api/parse-resume" element={<DocsParseResume />} />
-              <Route path="api/parse-jd" element={<DocsParseJD />} />
-              <Route path="api/invite-candidate" element={<DocsInviteCandidate />} />
-              <Route path="api/evaluate-interview" element={<DocsEvaluateInterview />} />
-              <Route path="webhooks" element={<DocsWebhooks />} />
-              <Route path="errors" element={<DocsErrorHandling />} />
-            </Route>
+          {/* Documentation Routes (Public) */}
+          <Route path="/docs" element={<DocsLayout />}>
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route path="overview" element={<DocsOverview />} />
+            <Route path="quick-start" element={<DocsQuickStart />} />
+            <Route path="authentication" element={<DocsAuthentication />} />
+            <Route path="api/match-resume" element={<DocsMatchResume />} />
+            <Route path="api/parse-resume" element={<DocsParseResume />} />
+            <Route path="api/parse-jd" element={<DocsParseJD />} />
+            <Route path="api/invite-candidate" element={<DocsInviteCandidate />} />
+            <Route path="api/evaluate-interview" element={<DocsEvaluateInterview />} />
+            <Route path="webhooks" element={<DocsWebhooks />} />
+            <Route path="errors" element={<DocsErrorHandling />} />
+          </Route>
 
-            {/* Catch all - redirect to home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <GlobalFooter />
-        </div>
+          {/* Catch all - redirect to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </FormDataProvider>
     </AuthProvider>
   );
