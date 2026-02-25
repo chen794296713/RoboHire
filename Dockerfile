@@ -36,7 +36,10 @@ RUN npm run build
 # 构建阶段 2 - 构建后端
 # ==========================================
 FROM harbor.lightark.cc/image-base/node:18.20.5-alpine as backend-build
-
+# 🚀 新增：设置系统时区为亚洲/上海
+ENV TZ=Asia/Shanghai
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
 WORKDIR /app
 
 # 复制后端 package.json
