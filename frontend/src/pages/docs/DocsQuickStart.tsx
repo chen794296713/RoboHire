@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { CodeBlock } from '../../components/docs';
+import SEO from '../../components/SEO';
 
 export default function DocsQuickStart() {
   const { t } = useTranslation();
@@ -53,13 +55,46 @@ result = response.json()
 print(result['data']['matchScore'])  # e.g., 85`,
   };
 
+  const techArticleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'RoboHire API Quick Start Guide',
+    description: 'Get up and running with the RoboHire AI hiring API in 5 minutes. Step-by-step guide to match resumes against job descriptions.',
+    url: 'https://robohire.io/docs/quick-start',
+    proficiencyLevel: 'Beginner',
+    dependencies: 'An HTTP client (curl, node-fetch, or requests for Python)',
+    author: { '@type': 'Organization', name: 'RoboHire', url: 'https://robohire.io' },
+    publisher: { '@type': 'Organization', name: 'RoboHire', url: 'https://robohire.io' },
+    datePublished: '2025-06-01',
+    dateModified: '2026-02-27',
+  };
+
+  const howToSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Integrate the RoboHire AI Hiring API',
+    description: 'Get up and running with the RoboHire API in 5 minutes. Match resumes against job descriptions using AI.',
+    totalTime: 'PT5M',
+    step: [
+      { '@type': 'HowToStep', position: 1, name: 'Get your API key', text: 'Sign up for a RoboHire account and generate an API key from your dashboard.' },
+      { '@type': 'HowToStep', position: 2, name: 'Install dependencies', text: 'Install an HTTP client library for your programming language (e.g., node-fetch for JavaScript, requests for Python).' },
+      { '@type': 'HowToStep', position: 3, name: 'Make your first API call', text: 'Send a POST request to /v1/match-resume with resumeText and jdText to match a resume against a job description.' },
+      { '@type': 'HowToStep', position: 4, name: 'Handle the response', text: 'Parse the JSON response containing matchScore, recommendation, and detailed matchAnalysis with technical skills and experience scores.' },
+    ],
+  };
+
   return (
     <div>
+      <SEO title={t('seo.docsQuickStart.title', 'Quick Start Guide')} description={t('seo.docsQuickStart.desc', 'Get up and running with the RoboHire API in 5 minutes. Step-by-step integration guide.')} url="https://robohire.io/docs/quick-start" keywords={t('seo.docsQuickStart.keywords', 'RoboHire API documentation, quick start guide, API integration')} />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(techArticleSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(howToSchema)}</script>
+      </Helmet>
       <h1 className="text-3xl font-bold text-gray-900 mb-4">
         {t('docs.quickStart.title', 'Quick Start')}
       </h1>
       <p className="text-lg text-gray-600 mb-8">
-        {t('docs.quickStart.intro', 'Get up and running with the RoboHire API in just a few minutes.')}
+        {t('docs.quickStart.intro', 'Get up and running with the RoboHire in just a few minutes.')}
       </p>
 
       {/* Step 1 */}

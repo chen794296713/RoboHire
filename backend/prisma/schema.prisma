@@ -18,6 +18,7 @@ model User {
   name          String?
   company       String?
   avatar        String?
+  role          String    @default("user") // 'user' or 'admin'
   provider      String?   // 'email', 'google', 'github', 'linkedin'
   providerId    String?
   createdAt     DateTime  @default(now())
@@ -29,14 +30,21 @@ model User {
   subscriptionStatus  String    @default("active") // active, past_due, canceled
   subscriptionId      String?
   currentPeriodEnd    DateTime?
+  trialEnd            DateTime?
   interviewsUsed      Int       @default(0)
   resumeMatchesUsed   Int       @default(0)
+  topUpBalance        Float     @default(0)
   
   hiringRequests  HiringRequest[]
   sessions        Session[]
   hiringSessions  HiringSession[]
   apiKeys         ApiKey[]
   usageRecords    ApiUsageRecord[]
+  apiRequestLogs  ApiRequestLog[]
+  llmCallLogs     LLMCallLog[]
+  topUpRecords    TopUpRecord[]
+  adminAdjustmentsReceived  AdminAdjustment[] @relation("AdminAdjustmentsReceived")
+  adminAdjustmentsMade      AdminAdjustment[] @relation("AdminAdjustmentsMade")
 
   @@index([email])
   @@index([provider, providerId])
@@ -122,6 +130,7 @@ model ApiKey {
   
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   usageRecords ApiUsageRecord[]
+  requestLogs  ApiRequestLog[]
 
   @@index([key])
   @@index([userId])
@@ -153,4 +162,121 @@ model ApiUsageRecord {
   @@index([endpoint])
   @@index([userId, createdAt])
   @@index([apiKeyId, createdAt])
+}
+
+model ApiRequestLog {
+  id               String   @id @default(cuid())
+  requestId        String?
+  userId           String?
+  apiKeyId         String?
+  endpoint         String
+  method           String
+  module           String
+  apiName          String
+  statusCode       Int      @default(200)
+  durationMs       Int      @default(0)
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  totalTokens      Int      @default(0)
+  llmCalls         Int      @default(0)
+  cost             Float    @default(0)
+  provider         String?
+  model            String?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime @default(now())
+
+  user       User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  apiKey     ApiKey?      @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  llmCallLog LLMCallLog[]
+
+  @@index([requestId])
+  @@index([userId])
+  @@index([apiKeyId])
+  @@index([createdAt])
+  @@index([endpoint])
+  @@index([module])
+  @@index([apiName])
+  @@index([provider])
+  @@index([model])
+  @@index([userId, createdAt])
+  @@index([module, createdAt])
+  @@index([apiName, createdAt])
+}
+
+model LLMCallLog {
+  id               String   @id @default(cuid())
+  requestId        String?
+  apiRequestLogId  String?
+  userId           String?
+  endpoint         String
+  module           String
+  provider         String
+  model            String
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  totalTokens      Int      @default(0)
+  cost             Float    @default(0)
+  durationMs       Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  apiRequestLog ApiRequestLog? @relation(fields: [apiRequestLogId], references: [id], onDelete: SetNull)
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([requestId])
+  @@index([apiRequestLogId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([endpoint])
+  @@index([module])
+  @@index([provider])
+  @@index([model])
+  @@index([module, createdAt])
+}
+
+model TopUpRecord {
+  id                  String   @id @default(cuid())
+  userId              String
+  stripeSessionId     String   @unique  // Stripe Checkout Session ID for idempotency
+  stripePaymentIntent String?  @unique  // Stripe PaymentIntent ID
+  amountCents         Int
+  amountDollars       Float
+  status              String   @default("pending") // pending, completed, failed
+  creditedAt          DateTime?
+  createdAt           DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([stripeSessionId])
+  @@index([stripePaymentIntent])
+}
+
+model AdminAdjustment {
+  id          String   @id @default(cuid())
+  userId      String
+  adminId     String
+  type        String   // "balance", "usage_interview", "usage_match", "subscription"
+  amount      Float?
+  oldValue    String?
+  newValue    String?
+  reason      String
+  createdAt   DateTime @default(now())
+
+  user  User @relation("AdminAdjustmentsReceived", fields: [userId], references: [id], onDelete: Cascade)
+  admin User @relation("AdminAdjustmentsMade", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([createdAt])
+}
+
+model AppConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@index([key])
 }

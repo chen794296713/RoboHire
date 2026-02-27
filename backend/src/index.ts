@@ -23,7 +23,9 @@ import apiKeysRouter from './routes/apiKeys.js';
 import usageRouter from './routes/usage.js';
 import demoRouter from './routes/demo.js';
 import checkoutRouter from './routes/checkout.js';
+import adminRouter from './routes/admin.js';
 import { attachRequestId } from './middleware/requestId.js';
+import { beginRequestLogging, persistRequestAudit } from './middleware/requestAudit.js';
 import { logger } from './services/LoggerService.js';
 import { documentStorage } from './services/DocumentStorageService.js';
 
@@ -49,6 +51,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use(attachRequestId);
+app.use(beginRequestLogging);
+app.use(persistRequestAudit);
 
 // API Routes
 app.use('/api/auth', authRouter);
@@ -60,6 +64,7 @@ app.use('/api/v1/api-keys', apiKeysRouter);
 app.use('/api/v1/usage', usageRouter);
 app.use('/api/v1/request-demo', demoRouter);
 app.use('/api/v1', checkoutRouter);
+app.use('/api/v1/admin', adminRouter);
 
 // Root endpoint
 app.get('/', (_req, res) => {
@@ -113,6 +118,9 @@ app.listen(PORT, () => {
   console.log(`║  🚀 Server running on: http://localhost:${PORT}                                   ║`);
   console.log(`║  🤖 LLM Provider:      ${(process.env.LLM_PROVIDER || 'openrouter').padEnd(56)}║`);
   console.log(`║  📦 LLM Model:         ${(process.env.LLM_MODEL || 'google/gemini-3-flash-preview').padEnd(56)}║`);
+  console.log(`║  🔊 TTS Provider:      ${(process.env.TTS_PROVIDER || 'none').padEnd(56)}║`);
+  console.log(`║  🎵 TTS Model:         ${(process.env.TTS_MODEL || '-').padEnd(56)}║`);
+  console.log(`║  🎤 TTS Voice ID:      ${(process.env.TTS_VOICE_ID || '-').padEnd(56)}║`);
   console.log(`║  📝 Log Level:         ${(process.env.LOG_LEVEL || 'INFO').padEnd(56)}║`);
   console.log(`║  📁 File Logging:      ${fileLogging.padEnd(56)}║`);
   console.log(`║  📂 Log Directory:     ${logDir.padEnd(56)}║`);
