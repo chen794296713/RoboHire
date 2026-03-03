@@ -14,3 +14,6 @@ export const API_BASE: string =
 // Set VITE_OAUTH_ENABLED=false to hide OAuth login buttons
 export const OAUTH_ENABLED = false;
 export const ICP_ENABLED = false;
+
+// Set VITE_STRIPE_ENABLED=false to hide Stripe/Credit Card payment option
+export const STRIPE_ENABLED = import.meta.env.VITE_STRIPE_ENABLED !== 'false';

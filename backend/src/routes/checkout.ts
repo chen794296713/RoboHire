@@ -221,8 +221,8 @@ router.post('/checkout/alipay', requireAuth, async (req, res) => {
 
     const alipayRequest = {
       out_trade_no: outTradeNo,
-      // total_amount: price,
-      total_amount: 0.01,
+      total_amount: price,
+      // total_amount: 0.01,
       subject: tier === 'starter' ? 'Starter套餐' : tier === 'growth' ? 'Growth套餐' : 'Business套餐',
       pay_channel: 'alipay',
       user_name: user.name || user.email?.split('@')[0] || 'user',
@@ -358,7 +358,7 @@ router.post('/topup/alipay', requireAuth, async (req, res) => {
 
     const alipayRequest = {
       out_trade_no: outTradeNo,
-      total_amount: 0.01, // Test with 0.01 CNY
+      total_amount: amount,
       subject: `RoboHire Top-Up $${amount}`,
       pay_channel: 'alipay',
       user_name: user.name || user.email?.split('@')[0] || 'user',
