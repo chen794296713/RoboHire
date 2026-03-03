@@ -28,6 +28,7 @@
     "formattedView": "Formatted View",
     "jsonView": "JSON View",
     "newAnalysis": "New Analysis",
+    "downloadReport": "Download Report",
     "analyzing": "Analyzing...",
     "analyzeMatch": "Analyze Match"
   },
@@ -629,6 +630,32 @@
           "Interviewing",
           "Employer Branding",
           "LinkedIn Recruiting"
+        ]
+      },
+      "dataAnnotation": {
+        "title": "Data Annotation Specialist",
+        "description": "Manage data labeling pipelines and quality for AI/ML models",
+        "experienceLevel": "1+ years",
+        "requirements": "We are hiring a Data Annotation Specialist to support our AI/ML initiatives.\n\n**Responsibilities:**\n- Annotate and label datasets for machine learning training\n- Define and maintain labeling guidelines and standards\n- Perform quality assurance on labeled data\n- Coordinate with ML engineers on annotation requirements\n- Manage annotation tools and workflows\n\n**Requirements:**\n- 1+ years of data annotation or labeling experience\n- Familiarity with annotation tools (Label Studio, Prodigy, etc.)\n- Strong attention to detail and consistency\n- Understanding of NLP or computer vision tasks\n- Good communication and documentation skills\n\n**Nice to have:**\n- Experience with LLM fine-tuning data preparation\n- Python scripting for data processing\n- Background in linguistics or domain expertise",
+        "skills": [
+          "Data Labeling",
+          "Quality Assurance",
+          "Annotation Tools",
+          "NLP",
+          "Attention to Detail"
+        ]
+      },
+      "wecomOperations": {
+        "title": "WeCom Operations Specialist",
+        "description": "Drive customer engagement and growth through WeCom (Enterprise WeChat)",
+        "experienceLevel": "2+ years",
+        "requirements": "We are looking for a WeCom Operations Specialist to manage our enterprise social engagement.\n\n**Responsibilities:**\n- Plan and execute WeCom customer engagement strategies\n- Build and manage customer communities and groups\n- Create content calendars and publish campaigns\n- Analyze engagement metrics and optimize conversion funnels\n- Coordinate with sales and marketing teams on lead nurturing\n\n**Requirements:**\n- 2+ years of WeCom or WeChat operations experience\n- Strong copywriting and content creation skills\n- Experience with WeCom APIs and third-party tools\n- Data-driven mindset with analytics experience\n- Understanding of private domain traffic strategies\n\n**Nice to have:**\n- Experience with CRM integration\n- Knowledge of marketing automation tools\n- Community management background",
+        "skills": [
+          "WeCom",
+          "Content Operations",
+          "Community Management",
+          "Data Analytics",
+          "Private Domain"
         ]
       }
     },

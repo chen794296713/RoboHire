@@ -63,9 +63,11 @@ const templateDefinitions: TemplateDefinition[] = [
   // Marketing
   { id: 'marketing-manager', category: 'marketing', icon: '📣', key: 'hiring.templates.marketingManager' },
   { id: 'content-writer', category: 'marketing', icon: '✍️', key: 'hiring.templates.contentWriter' },
+  { id: 'wecom-operations', category: 'marketing', icon: '💬', key: 'hiring.templates.wecomOperations' },
 
   // Operations
   { id: 'operations-manager', category: 'operations', icon: '📋', key: 'hiring.templates.operationsManager' },
+  { id: 'data-annotation', category: 'operations', icon: '🏷️', key: 'hiring.templates.dataAnnotation' },
 
   // Finance
   { id: 'financial-analyst', category: 'finance', icon: '📈', key: 'hiring.templates.financialAnalyst' },

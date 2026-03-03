@@ -28,6 +28,7 @@
     "formattedView": "Vista formateada",
     "jsonView": "Vista JSON",
     "newAnalysis": "Nuevo analisis",
+    "downloadReport": "Descargar Informe",
     "analyzing": "Analizando...",
     "analyzeMatch": "Analizar coincidencia"
   },
@@ -658,6 +659,32 @@
           "Entrevistas",
           "Employer branding",
           "LinkedIn Recruiter"
+        ]
+      },
+      "dataAnnotation": {
+        "title": "Especialista en Anotación de Datos",
+        "description": "Gestionar pipelines de etiquetado de datos y calidad para modelos AI/ML",
+        "experienceLevel": "1+ año",
+        "requirements": "Buscamos un/a Especialista en Anotación de Datos para apoyar iniciativas de AI/ML.\n\n**Responsabilidades:**\n- Anotar y etiquetar datasets para entrenamiento de ML\n- Definir y mantener guías y estándares de etiquetado\n- Realizar control de calidad sobre datos etiquetados\n- Coordinar con ingenieros de ML sobre requisitos de anotación\n- Gestionar herramientas y flujos de anotación\n\n**Requisitos:**\n- 1+ año de experiencia en anotación de datos\n- Familiaridad con herramientas de anotación (Label Studio, Prodigy, etc.)\n- Alta atención al detalle y consistencia\n- Comprensión de tareas de NLP o visión por computadora\n- Buenas habilidades de comunicación y documentación\n\n**Deseable:**\n- Experiencia en preparación de datos para fine-tuning de LLMs\n- Scripts en Python para procesamiento de datos\n- Formación en lingüística o experiencia de dominio",
+        "skills": [
+          "Etiquetado de Datos",
+          "Control de Calidad",
+          "Herramientas de Anotación",
+          "NLP",
+          "Atención al Detalle"
+        ]
+      },
+      "wecomOperations": {
+        "title": "Especialista en Operaciones WeCom",
+        "description": "Impulsar el engagement y crecimiento de clientes a través de WeCom",
+        "experienceLevel": "2+ años",
+        "requirements": "Buscamos un/a Especialista en Operaciones WeCom para gestionar el engagement social empresarial.\n\n**Responsabilidades:**\n- Planificar y ejecutar estrategias de engagement en WeCom\n- Construir y gestionar comunidades de clientes\n- Crear calendarios de contenido y publicar campañas\n- Analizar métricas de engagement y optimizar embudos de conversión\n- Coordinar con ventas y marketing para nutrición de leads\n\n**Requisitos:**\n- 2+ años de experiencia en operaciones WeCom o WeChat\n- Fuertes habilidades de redacción y creación de contenido\n- Experiencia con APIs de WeCom y herramientas de terceros\n- Mentalidad data-driven con experiencia en analytics\n- Comprensión de estrategias de tráfico de dominio privado\n\n**Deseable:**\n- Experiencia en integración CRM\n- Conocimiento de herramientas de automatización de marketing\n- Experiencia en gestión de comunidades",
+        "skills": [
+          "WeCom",
+          "Operaciones de Contenido",
+          "Gestión de Comunidades",
+          "Analítica de Datos",
+          "Dominio Privado"
         ]
       }
     },

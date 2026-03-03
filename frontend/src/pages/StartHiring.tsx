@@ -423,38 +423,20 @@ export default function StartHiring() {
   }, [fetchJdDraft, isJdGenerating, jdDraft, t]);
 
   const handleTemplateSelect = async (template: HiringTemplate) => {
-    let sessionId = activeSessionId;
-    if (!sessionId && isAuthenticated) {
-      sessionId = await createSession();
+    if (!activeSessionId && isAuthenticated) {
+      await createSession();
     }
 
     setStep('requirements');
-    const userPrompt = t('hiring.templateSelected', 'I want to hire: {{title}}', {
-      title: template.title,
-    });
-    await addMessage('user', userPrompt);
-
     setHiringData({
       title: template.title,
       requirements: template.requirements,
       jobDescription: '',
     });
 
-    setIsProcessing(true);
-    try {
-      const result = await sendChatMessage(userPrompt, sessionId, { role: template.title });
-      if (result?.message?.content) {
-        await addMessage('assistant', result.message.content);
-        setAssistantSuggestions(buildFollowUpSuggestions(result?.action));
-      }
-      await handleChatAction(result?.action);
-    } catch (error) {
-      console.error('Failed to process chat message:', error);
-      await addMessage('assistant', CHAT_ERROR_FALLBACK);
-      setAssistantSuggestions(buildFollowUpSuggestions());
-    } finally {
-      setIsProcessing(false);
-    }
+    // Pre-fill the chat input with requirements so user can review/edit before sending
+    setInput(template.requirements);
+    setTimeout(() => textareaRef.current?.focus(), 100);
   };
 
   const handleQuickStart = async (role: string) => {

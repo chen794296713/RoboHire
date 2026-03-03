@@ -28,6 +28,7 @@
     "formattedView": "Formatierte Ansicht",
     "jsonView": "JSON-Ansicht",
     "newAnalysis": "Neue Analyse",
+    "downloadReport": "Bericht herunterladen",
     "analyzing": "Analyse lauft...",
     "analyzeMatch": "Abgleich analysieren"
   },
@@ -658,6 +659,32 @@
           "Interviews",
           "Employer Branding",
           "LinkedIn Recruiting"
+        ]
+      },
+      "dataAnnotation": {
+        "title": "Datenannotations-Spezialist",
+        "description": "Verwaltung von Datenlabeling-Pipelines und Qualität für AI/ML-Modelle",
+        "experienceLevel": "1+ Jahr",
+        "requirements": "Wir suchen eine/n Datenannotations-Spezialist/in zur Unterstützung unserer AI/ML-Initiativen.\n\n**Aufgaben:**\n- Annotation und Labeling von Datensätzen für ML-Training\n- Erstellung und Pflege von Labeling-Richtlinien und Standards\n- Qualitätssicherung der gelabelten Daten\n- Abstimmung mit ML-Ingenieuren über Annotationsanforderungen\n- Verwaltung von Annotationstools und Workflows\n\n**Anforderungen:**\n- 1+ Jahr Erfahrung in Datenannotation oder Labeling\n- Vertrautheit mit Annotationstools (Label Studio, Prodigy etc.)\n- Hohe Detailgenauigkeit und Konsistenz\n- Verständnis von NLP- oder Computer-Vision-Aufgaben\n- Gute Kommunikations- und Dokumentationsfähigkeiten\n\n**Wünschenswert:**\n- Erfahrung in der Datenaufbereitung für LLM-Fine-Tuning\n- Python-Scripting für Datenverarbeitung\n- Hintergrund in Linguistik oder Fachexpertise",
+        "skills": [
+          "Datenlabeling",
+          "Qualitätssicherung",
+          "Annotationstools",
+          "NLP",
+          "Detailgenauigkeit"
+        ]
+      },
+      "wecomOperations": {
+        "title": "WeCom-Operations-Spezialist",
+        "description": "Kundenbindung und Wachstum über WeCom (Enterprise WeChat) fördern",
+        "experienceLevel": "2+ Jahre",
+        "requirements": "Wir suchen eine/n WeCom-Operations-Spezialist/in für das Enterprise Social Engagement.\n\n**Aufgaben:**\n- Planung und Durchführung von WeCom-Engagement-Strategien\n- Aufbau und Management von Kunden-Communities\n- Erstellung von Content-Kalendern und Kampagnen-Veröffentlichung\n- Analyse von Engagement-Metriken und Optimierung von Conversion-Funnels\n- Koordination mit Vertrieb und Marketing für Lead Nurturing\n\n**Anforderungen:**\n- 2+ Jahre Erfahrung in WeCom- oder WeChat-Operations\n- Starke Copywriting- und Content-Erstellungsfähigkeiten\n- Erfahrung mit WeCom-APIs und Drittanbieter-Tools\n- Datengetriebenes Denken mit Analytics-Erfahrung\n- Verständnis von Private-Domain-Traffic-Strategien\n\n**Wünschenswert:**\n- Erfahrung mit CRM-Integration\n- Kenntnisse von Marketing-Automatisierungstools\n- Community-Management-Hintergrund",
+        "skills": [
+          "WeCom",
+          "Content Operations",
+          "Community Management",
+          "Datenanalyse",
+          "Private Domain"
         ]
       }
     },
