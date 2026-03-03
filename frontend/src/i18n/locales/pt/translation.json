@@ -963,13 +963,17 @@
       "title": "Recarregar saldo",
       "currentBalance": "Saldo atual",
       "selectAmount": "Selecione um valor para adicionar ao seu saldo:",
-      "processing": "Processando...",
-      "success": "Recarga realizada com sucesso! Seu saldo foi atualizado."
+      "processando": "Processando...",
+      "success": "Recarga realizada com sucesso! Seu saldo foi atualizado.",
+      "paymentMethod": "Método de pagamento",
+      "stripe": "Cartão de crédito",
+      "alipay": "Alipay"
     },
     "billing": {
       "title": "Histórico de cobrança",
       "date": "Data",
       "description": "Descrição",
+      "source": "Método de pagamento",
       "amount": "Valor",
       "status": "Status",
       "action": "Recibo",

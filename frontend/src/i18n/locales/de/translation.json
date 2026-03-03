@@ -964,12 +964,16 @@
       "currentBalance": "Aktuelles Guthaben",
       "selectAmount": "Wählen Sie einen Betrag zum Aufladen:",
       "processing": "Wird verarbeitet...",
-      "success": "Aufladung erfolgreich! Ihr Guthaben wurde aktualisiert."
+      "success": "Aufladung erfolgreich! Ihr Guthaben wurde aktualisiert.",
+      "paymentMethod": "Zahlungsmethode",
+      "stripe": "Kreditkarte",
+      "alipay": "Alipay"
     },
     "billing": {
       "title": "Rechnungshistorie",
       "date": "Datum",
       "description": "Beschreibung",
+      "source": "Zahlungsmethode",
       "amount": "Betrag",
       "status": "Status",
       "action": "Beleg",

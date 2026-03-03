@@ -13,6 +13,19 @@ function getStripe(): Stripe | null {
   return new Stripe(key);
 }
 
+// Alipay configuration
+function getAlipayConfig() {
+  const backendUrl =
+    process.env.BACKEND_URL ||
+    process.env.API_BASE_URL ||
+    process.env.API_URL ||
+    `http://localhost:${process.env.PORT || 4607}`;
+  return {
+    baseUrl: process.env.ALIPAY_BASE_URL || 'https://worker.gohire.top',
+    notifyUrl: process.env.ALIPAY_NOTIFY_URL || `${backendUrl}/api/v1/payment/callback`,
+  };
+}
+
 let PRICE_MAP: Record<string, string | undefined> = {
   'starter_monthly': process.env.STRIPE_STARTER_MONTHLY_PRICE_ID,
   'growth_monthly': process.env.STRIPE_GROWTH_MONTHLY_PRICE_ID,
@@ -152,6 +165,117 @@ router.get('/config/pricing', async (_req, res) => {
 });
 
 /**
+ * POST /api/v1/checkout/alipay
+ * Create an Alipay order for subscription.
+ */
+router.post('/checkout/alipay', requireAuth, async (req, res) => {
+  try {
+    const { tier, trial } = req.body;
+    
+    if (!tier || !['starter', 'growth', 'business'].includes(tier)) {
+      return res.status(400).json({ success: false, error: 'Invalid tier' });
+    }
+
+    const user = req.user!;
+    const alipayConfig = getAlipayConfig();
+
+    // Get price from database or use default
+    const defaults: Record<string, number> = { starter: 29, growth: 199, business: 399 };
+    const configs = await prisma.appConfig.findMany({
+      where: { key: { in: ['price_starter_monthly', 'price_growth_monthly', 'price_business_monthly'] } },
+    });
+    const prices: Record<string, number> = { ...defaults };
+    for (const c of configs) {
+      const tierKey = c.key.replace('price_', '').replace('_monthly', '');
+      const val = parseFloat(c.value);
+      if (!isNaN(val)) prices[tierKey] = val;
+    }
+
+    const price = prices[tier];
+    const outTradeNo = `ORDER_${Date.now()}_${user.id.slice(0, 8)}`;
+    
+    // Map tier to package data
+    const packageData: Record<string, any> = {
+      starter: {
+        package_id: 'starter_monthly',
+        package_name: `month_${price}`,
+        package_type: '1',
+        package_price: String(price),
+        package_info: JSON.stringify({ number: 30, description: '当月有效', msg: '30次简历匹配', times: 30, type: 'resume' }),
+      },
+      growth: {
+        package_id: 'growth_monthly',
+        package_name: `month_${price}`,
+        package_type: '1',
+        package_price: String(price),
+        package_info: JSON.stringify({ number: 120, description: '当月有效', msg: '120次面试', times: 120, type: 'interview' }),
+      },
+      business: {
+        package_id: 'business_monthly',
+        package_name: `month_${price}`,
+        package_type: '1',
+        package_price: String(price),
+        package_info: JSON.stringify({ number: 280, description: '当月有效', msg: '280次面试', times: 280, type: 'interview' }),
+      },
+    };
+
+    const alipayRequest = {
+      out_trade_no: outTradeNo,
+      // total_amount: price,
+      total_amount: 0.01,
+      subject: tier === 'starter' ? 'Starter套餐' : tier === 'growth' ? 'Growth套餐' : 'Business套餐',
+      pay_channel: 'alipay',
+      user_name: user.name || user.email?.split('@')[0] || 'user',
+      user_email: user.email || '',
+      user_id: user.id,
+      platform: 'gohire',
+      package_data: packageData[tier],
+      notify_url: alipayConfig.notifyUrl,
+    };
+    console.log('Alipay request', alipayRequest);
+    const response = await fetch(`${alipayConfig.baseUrl}/payment/payment/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(alipayRequest),
+    });
+
+    const data: any = await response.json();
+
+    // Alipay returns { code: 0, data: { pay_url: ... }, message: null } on success
+    if (data.code === 0 && data.data?.pay_url) {
+      // Create a pending payment record
+      await prisma.paymentRecord.create({
+        data: {
+          userId: user.id,
+          outTradeNo,
+          amount: price,
+          currency: 'CNY',
+          paymentMethod: 'alipay',
+          tier,
+          status: 'pending',
+          metadata: {
+            trial: trial === true,
+            packageData: packageData[tier],
+          },
+        },
+      });
+
+      // Return the pay_url directly for frontend to handle
+      res.json({ code: 0, data: { pay_url: data.data.pay_url, outTradeNo } });
+    } else {
+      console.error('Alipay create order failed:', data);
+      res.status(500).json({ code: data.code || 1, error: data.message || 'Failed to create Alipay order' });
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Failed to create Alipay order';
+    console.error('Alipay checkout error:', msg, error);
+    res.status(500).json({ success: false, error: msg });
+  }
+});
+
+/**
  * POST /api/v1/topup
  * Create a Stripe Checkout Session for a one-time top-up payment.
  */
@@ -210,6 +334,97 @@ router.post('/topup', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('Top-up session error:', error);
     res.status(500).json({ success: false, error: 'Failed to create top-up session' });
+  }
+});
+
+/**
+ * POST /api/v1/topup/alipay
+ * Create an Alipay order for top-up payment.
+ */
+router.post('/topup/alipay', requireAuth, async (req, res) => {
+  try {
+    const { amount } = req.body; // amount in dollars
+    if (!amount || typeof amount !== 'number' || amount < 10 || amount > 1000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid top-up amount. Must be between $10 and $1,000.',
+      });
+    }
+
+    const user = req.user!;
+    const alipayConfig = getAlipayConfig();
+
+    const outTradeNo = `TOPUP_${Date.now()}_${user.id.slice(0, 8)}`;
+
+    const alipayRequest = {
+      out_trade_no: outTradeNo,
+      total_amount: 0.01, // Test with 0.01 CNY
+      subject: `RoboHire Top-Up $${amount}`,
+      pay_channel: 'alipay',
+      user_name: user.name || user.email?.split('@')[0] || 'user',
+      user_email: user.email || '',
+      user_id: user.id,
+      platform: 'gohire',
+      package_data: {
+        package_id: 'topup',
+        package_name: `topup_${amount}`,
+        package_type: '1',
+        package_price: String(amount),
+        package_info: JSON.stringify({ number: amount, description: '充值余额', msg: `充值$${amount}`, times: amount, type: 'topup' }),
+      },
+      notify_url: alipayConfig.notifyUrl,
+    };
+    console.log('Alipay topup request', alipayRequest);
+
+    const response = await fetch(`${alipayConfig.baseUrl}/payment/payment/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(alipayRequest),
+    });
+
+    const data: any = await response.json();
+
+    // Alipay returns { code: 0, data: { pay_url: ... }, message: null } on success
+    if (data.code === 0 && data.data?.pay_url) {
+      // Create a pending topup record for Alipay (without metadata field)
+      await prisma.topUpRecord.create({
+        data: {
+          userId: user.id,
+          stripeSessionId: outTradeNo, // Reuse this field for Alipay outTradeNo
+          amountCents: Math.round(amount * 100),
+          amountDollars: amount,
+          status: 'pending',
+        },
+      });
+
+      // Also create a payment record for consistency
+      await prisma.paymentRecord.create({
+        data: {
+          userId: user.id,
+          outTradeNo,
+          amount: amount,
+          currency: 'CNY',
+          paymentMethod: 'alipay',
+          status: 'pending',
+          metadata: {
+            type: 'topup',
+            amountDollars: amount,
+          },
+        },
+      });
+
+      // Return the pay_url directly for frontend to handle
+      res.json({ code: 0, data: { pay_url: data.data.pay_url, outTradeNo } });
+    } else {
+      console.error('Alipay topup create order failed:', data);
+      res.status(500).json({ code: data.code || 1, error: data.message || 'Failed to create Alipay order' });
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Failed to create Alipay top-up order';
+    console.error('Alipay topup error:', msg, error);
+    res.status(500).json({ success: false, error: msg });
   }
 });
 
@@ -561,6 +776,69 @@ router.get('/billing-history', requireAuth, async (req, res) => {
 });
 
 /**
+ * GET /api/v1/payment-records
+ * Fetch all payment records (Alipay, Stripe, etc.) from database.
+ */
+router.get('/payment-records', requireAuth, async (req, res) => {
+  try {
+    const user = req.user!;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+
+    const [records, total] = await Promise.all([
+      prisma.paymentRecord.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.paymentRecord.count({ where: { userId: user.id } }),
+    ]);
+
+    const paymentMethodLabels: Record<string, string> = {
+      alipay: 'Alipay',
+      stripe: 'Stripe',
+      credit: 'Credit',
+    };
+
+    const tierLabels: Record<string, string> = {
+      starter: 'Starter',
+      growth: 'Growth',
+      business: 'Business',
+    };
+
+    res.json({
+      success: true,
+      data: {
+        records: records.map(r => ({
+          id: r.id,
+          outTradeNo: r.outTradeNo,
+          amount: r.amount,
+          currency: r.currency,
+          paymentMethod: r.paymentMethod,
+          paymentMethodLabel: paymentMethodLabels[r.paymentMethod] || r.paymentMethod,
+          tier: r.tier,
+          tierLabel: r.tier ? (tierLabels[r.tier] || r.tier) : null,
+          status: r.status,
+          paidAt: r.paidAt,
+          createdAt: r.createdAt,
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Payment records error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch payment records' });
+  }
+});
+
+/**
  * POST /api/v1/webhooks/stripe
  * Stripe webhook handler. Must receive raw body for signature verification.
  */
@@ -631,6 +909,25 @@ router.post('/webhooks/stripe', async (req, res) => {
               });
             });
             console.log(`Credited $${amountCents / 100} to user ${userId} (session ${session.id})`);
+
+            // Create PaymentRecord for top-up
+            await prisma.paymentRecord.create({
+              data: {
+                userId,
+                outTradeNo: `stripe_topup_${session.id}`,
+                amount: amountCents / 100,
+                currency: 'USD',
+                paymentMethod: 'stripe',
+                status: 'completed',
+                tradeNo: session.payment_intent as string || undefined,
+                paidAt: new Date(),
+                metadata: {
+                  stripeSessionId: session.id,
+                  stripePaymentIntent: session.payment_intent as string,
+                },
+              },
+            });
+            console.log(`Created PaymentRecord for top-up: stripe_topup_${session.id}`);
           }
           break;
         }
@@ -658,6 +955,29 @@ router.post('/webhooks/stripe', async (req, res) => {
           });
           // Reset usage counters when starting a new subscription
           await resetUsageCounters(userId);
+
+          // Create PaymentRecord for subscription
+          const subscriptionAmount = session.amount_total ? session.amount_total / 100 : 0;
+          const subscriptionOutTradeNo = `stripe_sub_${session.id}`;
+          await prisma.paymentRecord.create({
+            data: {
+              userId,
+              outTradeNo: subscriptionOutTradeNo,
+              amount: subscriptionAmount,
+              currency: session.currency?.toUpperCase() || 'USD',
+              paymentMethod: 'stripe',
+              tier,
+              status: 'completed',
+              tradeNo: session.payment_intent as string || undefined,
+              paidAt: new Date(),
+              metadata: {
+                stripeSessionId: session.id,
+                stripeSubscriptionId: session.subscription as string,
+                isTrial,
+              },
+            },
+          });
+          console.log(`Created PaymentRecord for subscription: ${subscriptionOutTradeNo}`);
         }
         break;
       }
@@ -741,6 +1061,190 @@ router.post('/webhooks/stripe', async (req, res) => {
   }
 
   res.json({ received: true });
+});
+
+/**
+ * ALL /api/v1/payment/callback
+ * Payment callback handler.
+ *
+ * Supports:
+ * - Alipay-style POST body: { out_trade_no, trade_no, trade_status, total_amount }
+ * - Worker notify GET example:
+ *   notify_url + "?pay_status=" + tmp_status + "&out_trade_no=" + order.out_trade_no
+ */
+router.all('/payment/callback', async (req, res) => {
+  try {
+    const body = (req.body || {}) as Record<string, unknown>;
+    const query = (req.query || {}) as Record<string, unknown>;
+
+    const out_trade_no =
+      (body.out_trade_no as string | undefined) ||
+      (body.outTradeNo as string | undefined) ||
+      (query.out_trade_no as string | undefined) ||
+      (query.outTradeNo as string | undefined);
+
+    const trade_no =
+      (body.trade_no as string | undefined) ||
+      (body.tradeNo as string | undefined) ||
+      (query.trade_no as string | undefined) ||
+      (query.tradeNo as string | undefined);
+
+    const trade_status =
+      (body.trade_status as string | undefined) ||
+      (body.tradeStatus as string | undefined) ||
+      (query.trade_status as string | undefined) ||
+      (query.tradeStatus as string | undefined);
+
+    const pay_status =
+      (body.pay_status as string | undefined) ||
+      (body.payStatus as string | undefined) ||
+      (query.pay_status as string | undefined) ||
+      (query.payStatus as string | undefined);
+
+    const total_amount =
+      (body.total_amount as string | number | undefined) ||
+      (query.total_amount as string | number | undefined);
+
+    console.log('Payment callback received:', {
+      method: req.method,
+      out_trade_no,
+      trade_no,
+      trade_status,
+      pay_status,
+      total_amount,
+    });
+
+    if (!out_trade_no) {
+      return res.status(400).json({ success: false, error: 'Missing out_trade_no' });
+    }
+
+    // Find the payment record
+    const payment = await prisma.paymentRecord.findUnique({
+      where: { outTradeNo: out_trade_no },
+    });
+
+    if (!payment) {
+      console.error('Payment record not found:', out_trade_no);
+      return res.status(404).json({ success: false, error: 'Payment record not found' });
+    }
+
+    // Check if payment is already completed
+    if (payment.status === 'completed') {
+      return res.json({ success: true, message: 'Payment already processed' });
+    }
+
+    // Verify status (supports both trade_status and pay_status)
+    const successStatuses = new Set(['TRADE_SUCCESS', 'TRADE_FINISHED', 'SUCCESS', 'success', 'paid', 'PAID', '1', 'true', 'TRUE']);
+    const failureStatuses = new Set(['FAILED', 'failed', '0', 'false', 'FALSE']);
+    const statusToken = String((trade_status ?? pay_status ?? '')).trim();
+
+    const isSuccess = successStatuses.has(statusToken);
+    const isFailure = failureStatuses.has(statusToken);
+
+    if (!statusToken) {
+      return res.status(400).json({ success: false, error: 'Missing trade_status/pay_status' });
+    }
+
+    if (isSuccess) {
+      // Update payment record
+      await prisma.paymentRecord.update({
+        where: { id: payment.id },
+        data: {
+          status: 'completed',
+          tradeNo: trade_no,
+          paidAt: new Date(),
+        },
+      });
+
+      // Update user subscription or top-up balance
+      const metadata = payment.metadata as any;
+      if (metadata?.type === 'topup') {
+        // Handle top-up: credit the balance
+        const amountDollars = metadata?.amountDollars || payment.amount;
+        await prisma.user.update({
+          where: { id: payment.userId },
+          data: {
+            topUpBalance: { increment: amountDollars },
+          },
+        });
+
+        // Also update TopUpRecord if exists
+        const topupRecord = await prisma.topUpRecord.findFirst({
+          where: { stripeSessionId: payment.outTradeNo },
+        });
+        if (topupRecord) {
+          await prisma.topUpRecord.update({
+            where: { id: topupRecord.id },
+            data: {
+              status: 'completed',
+              creditedAt: new Date(),
+            },
+          });
+        }
+
+        console.log(`Top-up completed for user ${payment.userId}, amount: $${amountDollars}`);
+      } else {
+        // Handle subscription
+        await prisma.user.update({
+          where: { id: payment.userId },
+          data: {
+            subscriptionTier: payment.tier || 'starter',
+            subscriptionStatus: 'active',
+            trialEnd: metadata?.trial ? new Date(Date.now() + FREE_TRIAL_DAYS * 24 * 60 * 60 * 1000) : null,
+          },
+        });
+
+        // Reset usage counters
+        await resetUsageCounters(payment.userId);
+
+        console.log(`Payment completed for user ${payment.userId}, tier: ${payment.tier}`);
+      }
+    } else if (isFailure || !isSuccess) {
+      // Update payment status to failed
+      await prisma.paymentRecord.update({
+        where: { id: payment.id },
+        data: { status: 'failed' },
+      });
+      console.log('Payment failed:', statusToken);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Alipay callback error:', error);
+    res.status(500).json({ success: false, error: 'Callback processing error' });
+  }
+});
+
+/**
+ * GET /api/v1/payment/status/:outTradeNo
+ * Check payment status
+ */
+router.get('/payment/status/:outTradeNo', requireAuth, async (req, res) => {
+  try {
+    const { outTradeNo } = req.params;
+    const user = req.user!;
+
+    const payment = await prisma.paymentRecord.findFirst({
+      where: { outTradeNo, userId: user.id },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ success: false, error: 'Payment not found' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        status: payment.status,
+        tier: payment.tier,
+        amount: payment.amount,
+        paidAt: payment.paidAt,
+      },
+    });
+  } catch (error) {
+    console.error('Payment status error:', error);
+    res.status(500).json({ success: false, error: 'Failed to check payment status' });
+  }
 });
 
 export default router;

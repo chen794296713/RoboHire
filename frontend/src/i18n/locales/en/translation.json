@@ -898,12 +898,16 @@
       "currentBalance": "Current Balance",
       "selectAmount": "Select an amount to add to your balance:",
       "processing": "Processing...",
-      "success": "Top-up successful! Your balance has been updated."
+      "success": "Top-up successful! Your balance has been updated.",
+      "paymentMethod": "Payment Method",
+      "stripe": "Credit Card",
+      "alipay": "Alipay"
     },
     "billing": {
       "title": "Billing History",
       "date": "Date",
       "description": "Description",
+      "source": "Source",
       "amount": "Amount",
       "status": "Status",
       "action": "Receipt",

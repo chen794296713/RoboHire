@@ -36,6 +36,8 @@ export default function Pricing() {
   const navigate = useNavigate();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [dynamicPrices, setDynamicPrices] = useState<{ starter: number; growth: number; business: number }>({
     starter: 29, growth: 199, business: 399,
   });
@@ -198,8 +200,18 @@ export default function Pricing() {
       navigate('/login', { state: { from: { pathname: '/pricing' }, trial: startTrial, tier: plan.id } });
       return;
     }
-    setLoadingTier(plan.id);
+    // Show payment method selection modal
+    setSelectedPlan(plan);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentMethodSelect = async (method: 'stripe' | 'alipay') => {
+    if (!selectedPlan) return;
+    
+    setLoadingTier(selectedPlan.id);
     setCheckoutError(null);
+    setShowPaymentModal(false);
+
     try {
       const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = {
@@ -208,21 +220,36 @@ export default function Pricing() {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      const response = await fetch(`${API_BASE}/api/v1/checkout`, {
+
+      // Use different API endpoint based on payment method
+      const endpoint = method === 'alipay' ? '/api/v1/checkout/alipay' : '/api/v1/checkout';
+      const response = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
         headers,
         credentials: 'include',
         body: JSON.stringify({
-          tier: plan.id,
-          trial: startTrial,
+          tier: selectedPlan.id,
+          trial: true, // Always start with trial for now
         }),
       });
+
       if (response.status === 401) {
-        navigate('/login', { state: { from: { pathname: '/pricing' }, trial: startTrial, tier: plan.id } });
+        navigate('/login', { state: { from: { pathname: '/pricing' }, trial: true, tier: selectedPlan.id } });
         return;
       }
+
       const data = await response.json();
-      if (data.success && data.data?.url) {
+      
+      // Handle Alipay response (code: 0 means success)
+      if (method === 'alipay') {
+        if (data.code === 0 && data.data?.pay_url) {
+          window.location.href = data.data.pay_url;
+          return;
+        } else {
+          setCheckoutError(data.message || data.error || t('pricing.checkoutError', 'Failed to create Alipay order. Please try again.'));
+        }
+      } else if (data.success && data.data?.url) {
+        // Handle Stripe response
         window.location.href = data.data.url;
       } else {
         setCheckoutError(data.error || t('pricing.checkoutError', 'Failed to start checkout. Please try again.'));
@@ -232,6 +259,7 @@ export default function Pricing() {
       setCheckoutError(t('pricing.checkoutError', 'Failed to start checkout. Please try again.'));
     } finally {
       setLoadingTier(null);
+      setSelectedPlan(null);
     }
   };
 
@@ -310,6 +338,69 @@ export default function Pricing() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
                 {checkoutError}
+              </div>
+            </div>
+          )}
+
+          {/* Payment Method Modal */}
+          {showPaymentModal && selectedPlan && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/50" onClick={() => setShowPaymentModal(false)} />
+              <div className="relative bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
+                <button
+                  onClick={() => setShowPaymentModal(false)}
+                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {t('pricing.payment.selectMethod', '选择支付方式')}
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  {selectedPlan.name} - ${selectedPlan.monthlyPrice}/{t('pricing.month', 'mo')}
+                </p>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handlePaymentMethodSelect('alipay')}
+                    disabled={loadingTier === selectedPlan.id}
+                    className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src="/alipay_icon.png"
+                        alt={t('account.topup.alipay', 'Alipay')}
+                        className="w-24 h-8"
+                      />
+                      <span className="sr-only">
+                        {t('account.topup.alipay', 'Alipay')}
+                      </span>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+
+                  <button
+                    onClick={() => handlePaymentMethodSelect('stripe')}
+                    disabled={loadingTier === selectedPlan.id}
+                    className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg className="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                        <rect width="48" height="48" rx="8" fill="#635BFF"/>
+                        <text x="24" y="30" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">Credit Card</text>
+                      </svg>
+                      <span className="font-medium text-gray-900">Credit Card</span>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           )}

@@ -965,12 +965,16 @@
       "currentBalance": "Saldo actual",
       "selectAmount": "Selecciona un monto para añadir a tu saldo:",
       "processing": "Procesando...",
-      "success": "¡Recarga exitosa! Tu saldo ha sido actualizado."
+      "success": "¡Recarga exitosa! Tu saldo ha sido actualizado.",
+      "paymentMethod": "Método de pago",
+      "stripe": "Tarjeta de crédito",
+      "alipay": "Alipay"
     },
     "billing": {
       "title": "Historial de facturación",
       "date": "Fecha",
       "description": "Descripción",
+      "source": "Método de pago",
       "amount": "Monto",
       "status": "Estado",
       "action": "Recibo",

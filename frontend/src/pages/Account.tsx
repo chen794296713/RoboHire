@@ -25,7 +25,14 @@ interface BillingItem {
   invoiceUrl?: string | null;
   pdfUrl?: string | null;
   receiptUrl?: string | null;
-  type: 'invoice' | 'charge';
+  type: 'invoice' | 'charge' | 'payment';
+  // Payment records fields
+  paymentMethod?: string;
+  paymentMethodLabel?: string;
+  tier?: string | null;
+  tierLabel?: string | null;
+  outTradeNo?: string;
+  createdAt?: string;
 }
 
 function authFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
@@ -68,6 +75,7 @@ export default function Account() {
   const [topupLoading, setTopupLoading] = useState<number | null>(null);
   const [topupMsg, setTopupMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [customAmount, setCustomAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'alipay'>('stripe');
 
   // Sync state
   const [syncing, setSyncing] = useState(false);
@@ -136,23 +144,59 @@ export default function Account() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch billing history
+  // Fetch billing history and payment records
   useEffect(() => {
     const fetchBilling = async () => {
       setBillingLoading(true);
       try {
-        const res = await authFetch('/api/v1/billing-history');
-        const data = await res.json();
-        if (data.success) {
-          const invoices: BillingItem[] = (data.data.invoices || []).map((inv: any) => ({ ...inv, type: 'invoice' }));
-          const charges: BillingItem[] = (data.data.charges || []).map((ch: any) => ({ ...ch, type: 'charge' }));
-          const combined = [...invoices, ...charges].sort(
-            (a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
-          );
-          setBillingItems(combined);
+        const items: BillingItem[] = [];
+
+        // Fetch Stripe billing history (if configured)
+        try {
+          const res = await authFetch('/api/v1/billing-history');
+          const data = await res.json();
+          if (data.success) {
+            const invoices: BillingItem[] = (data.data.invoices || []).map((inv: any) => ({ ...inv, type: 'invoice' as const }));
+            const charges: BillingItem[] = (data.data.charges || []).map((ch: any) => ({ ...ch, type: 'charge' as const }));
+            items.push(...invoices, ...charges);
+          }
+        } catch {
+          // Silently fail — Stripe may not be configured
         }
+
+        // Fetch all payment records (Alipay, Stripe, etc.)
+        try {
+          const res = await authFetch('/api/v1/payment-records');
+          const data = await res.json();
+          if (data.success && data.data.records) {
+            const paymentRecords: BillingItem[] = data.data.records.map((r: any) => ({
+              id: r.id,
+              amount: r.amount,
+              currency: r.currency,
+              status: r.status,
+              description: r.tier ? `${r.tierLabel} Subscription` : `Top-up`,
+              date: r.paidAt || r.createdAt,
+              paymentMethod: r.paymentMethod,
+              paymentMethodLabel: r.paymentMethodLabel,
+              tier: r.tier,
+              tierLabel: r.tierLabel,
+              outTradeNo: r.outTradeNo,
+              createdAt: r.createdAt,
+              type: 'payment' as const,
+            }));
+            items.push(...paymentRecords);
+          }
+        } catch {
+          // Silently fail
+        }
+
+        // Sort by date descending
+        const sorted = items.sort(
+          (a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+        );
+        setBillingItems(sorted);
       } catch {
-        // Silently fail — billing may not be configured
+        // Silently fail
       } finally {
         setBillingLoading(false);
       }
@@ -204,7 +248,7 @@ export default function Account() {
     }
   };
 
-  const handleTopup = async (dollars: number) => {
+  const handleTopup = async (dollars: number, method: 'stripe' | 'alipay' = 'stripe') => {
     const cents = Math.round(dollars * 100);
     if (cents < 1000 || cents > 100000) {
       setTopupMsg({ type: 'error', text: t('account.topup.invalidAmount', 'Amount must be between $10 and $1,000.') });
@@ -213,15 +257,28 @@ export default function Account() {
     setTopupLoading(cents);
     setTopupMsg(null);
     try {
-      const res = await authFetch('/api/v1/topup', {
-        method: 'POST',
-        body: JSON.stringify({ amount: cents }),
-      });
-      const data = await res.json();
-      if (data.success && data.data?.url) {
-        window.location.href = data.data.url;
+      if (method === 'alipay') {
+        const res = await authFetch('/api/v1/topup/alipay', {
+          method: 'POST',
+          body: JSON.stringify({ amount: dollars }),
+        });
+        const data = await res.json();
+        if (data.code === 0 && data.data?.pay_url) {
+          window.location.href = data.data.pay_url;
+        } else {
+          throw new Error(data.error || 'Failed to create Alipay top-up order');
+        }
       } else {
-        throw new Error(data.error || 'Failed to create top-up session');
+        const res = await authFetch('/api/v1/topup', {
+          method: 'POST',
+          body: JSON.stringify({ amount: cents }),
+        });
+        const data = await res.json();
+        if (data.success && data.data?.url) {
+          window.location.href = data.data.url;
+        } else {
+          throw new Error(data.error || 'Failed to create top-up session');
+        }
       }
     } catch (err) {
       setTopupMsg({ type: 'error', text: err instanceof Error ? err.message : 'Top-up failed' });
@@ -511,6 +568,47 @@ export default function Account() {
             </div>
           </div>
 
+          {/* Payment method selector */}
+          <div className="space-y-2">
+            <span className="text-sm font-medium text-gray-700">{t('account.topup.paymentMethod', 'Payment Method')}</span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('stripe')}
+                disabled={topupLoading !== null}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+                  paymentMethod === 'stripe'
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50'
+                }`}
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/>
+                </svg>
+                {t('account.topup.stripe', 'Credit Card')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('alipay')}
+                disabled={topupLoading !== null}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+                  paymentMethod === 'alipay'
+                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50'
+                }`}
+              >
+                <img
+                  src="/alipay_icon.png"
+                  alt={t('account.topup.alipay', 'Alipay')}
+                  className="h-5"
+                />
+                <span className="sr-only">
+                  {t('account.topup.alipay', 'Alipay')}
+                </span>
+              </button>
+            </div>
+          </div>
+
           {/* Purchase button */}
           <button
             onClick={() => {
@@ -519,7 +617,7 @@ export default function Account() {
                 setTopupMsg({ type: 'error', text: t('account.topup.invalidAmount', 'Amount must be between $10 and $1,000.') });
                 return;
               }
-              handleTopup(val);
+              handleTopup(val, paymentMethod);
             }}
             disabled={topupLoading !== null || !customAmount || parseFloat(customAmount) < 10}
             className="w-full py-3 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -564,6 +662,7 @@ export default function Account() {
                 <tr className="border-b border-gray-200 text-left">
                   <th className="pb-2 font-medium text-gray-500">{t('account.billing.date', 'Date')}</th>
                   <th className="pb-2 font-medium text-gray-500">{t('account.billing.description', 'Description')}</th>
+                  <th className="pb-2 font-medium text-gray-500">{t('account.billing.source', 'Source')}</th>
                   <th className="pb-2 font-medium text-gray-500">{t('account.billing.amount', 'Amount')}</th>
                   <th className="pb-2 font-medium text-gray-500">{t('account.billing.status', 'Status')}</th>
                   <th className="pb-2 font-medium text-gray-500">{t('account.billing.action', 'Receipt')}</th>
@@ -572,14 +671,26 @@ export default function Account() {
               <tbody className="divide-y divide-gray-100">
                 {billingItems.map((item) => {
                   const link = item.type === 'invoice' ? item.invoiceUrl : item.receiptUrl;
+                  const sourceLabel = item.paymentMethodLabel || (item.type === 'invoice' ? 'Stripe' : item.type === 'charge' ? 'Stripe' : '-');
                   return (
                     <tr key={item.id} className="text-gray-700">
                       <td className="py-2.5">{item.date ? new Date(item.date).toLocaleDateString() : '—'}</td>
                       <td className="py-2.5">{item.description}</td>
+                      <td className="py-2.5">
+                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                          sourceLabel === 'Alipay'
+                            ? 'bg-blue-100 text-blue-700'
+                            : sourceLabel === 'Stripe'
+                              ? 'bg-purple-100 text-purple-700'
+                              : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {sourceLabel}
+                        </span>
+                      </td>
                       <td className="py-2.5 font-medium">${item.amount.toFixed(2)}</td>
                       <td className="py-2.5">
                         <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                          item.status === 'paid' || item.status === 'succeeded'
+                          item.status === 'paid' || item.status === 'succeeded' || item.status === 'completed'
                             ? 'bg-emerald-100 text-emerald-700'
                             : item.status === 'open' || item.status === 'pending'
                               ? 'bg-amber-100 text-amber-700'
