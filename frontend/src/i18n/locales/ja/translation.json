@@ -1099,6 +1099,7 @@
       "statusPending": "保留中",
       "startNew": "新しいバッチを開始",
       "goToDashboard": "ダッシュボードへ",
+      "viewResumeLibrary": "履歴書ライブラリを表示",
       "authRequired": "サインインが必要です",
       "authRequiredDesc": "面接招待を送信するにはサインインが必要です。",
       "errorNoJd": "職務記述を入力してください。",

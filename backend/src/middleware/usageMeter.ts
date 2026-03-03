@@ -249,6 +249,105 @@ export function checkUsageLimit(action: BillableAction) {
 }
 
 /**
+ * Check and deduct usage for a batch of billable actions (e.g. batch-invite).
+ * Returns the number of units that can be processed, or an error object.
+ *
+ * Logic:
+ * 1. Compute how many units fit within the plan quota
+ * 2. For remaining units, check top-up balance
+ * 3. Deduct everything atomically
+ * 4. Return breakdown of plan-covered vs top-up-covered units
+ */
+export async function checkBatchUsage(
+  userId: string,
+  action: BillableAction,
+  count: number
+): Promise<
+  | { ok: true; planUnits: number; topUpUnits: number; topUpCost: number }
+  | { ok: false; error: string; code: string; details?: Record<string, unknown> }
+> {
+  const freshUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      subscriptionTier: true,
+      subscriptionStatus: true,
+      interviewsUsed: true,
+      resumeMatchesUsed: true,
+      topUpBalance: true,
+      customMaxInterviews: true,
+      customMaxMatches: true,
+    },
+  });
+
+  if (!freshUser) {
+    return { ok: false, error: 'User not found', code: 'USER_NOT_FOUND' };
+  }
+
+  const tier = freshUser.subscriptionTier || 'free';
+  const planLimits = await getPlanLimits();
+  const payPerUse = await getPayPerUseRates();
+  const limits = planLimits[tier] || planLimits.free;
+  const status = freshUser.subscriptionStatus;
+
+  if (tier !== 'free' && status !== 'active' && status !== 'trialing') {
+    if (freshUser.topUpBalance <= 0) {
+      return { ok: false, error: 'Your subscription is inactive.', code: 'SUBSCRIPTION_INACTIVE' };
+    }
+  }
+
+  const used = action === 'interview' ? freshUser.interviewsUsed : freshUser.resumeMatchesUsed;
+  const limit = action === 'interview'
+    ? (freshUser.customMaxInterviews ?? limits.interviews)
+    : (freshUser.customMaxMatches ?? limits.matches);
+  const price = action === 'interview' ? payPerUse.interview : payPerUse.match;
+  const usedField = action === 'interview' ? 'interviewsUsed' : 'resumeMatchesUsed';
+
+  // How many fit within the plan quota
+  const remainingQuota = Math.max(0, limit - used);
+  const planUnits = Math.min(count, remainingQuota);
+  const overageUnits = count - planUnits;
+
+  // Check top-up balance for overage
+  const overageCost = overageUnits * price;
+  if (overageCost > 0 && freshUser.topUpBalance < overageCost) {
+    const affordable = Math.floor(freshUser.topUpBalance / price);
+    const totalAffordable = planUnits + affordable;
+    if (totalAffordable === 0) {
+      const actionLabel = action === 'interview' ? 'interview' : 'resume match';
+      return {
+        ok: false,
+        error: `You've reached your monthly ${actionLabel} limit (${limit}). Top up your balance to continue.`,
+        code: 'USAGE_LIMIT_EXCEEDED',
+        details: { used, limit, pricePerUnit: price, currentBalance: freshUser.topUpBalance, requested: count },
+      };
+    }
+    // Partial: can only afford some — reject so user knows upfront
+    const actionLabel = action === 'interview' ? 'interviews' : 'resume matches';
+    return {
+      ok: false,
+      error: `Insufficient balance for ${count} ${actionLabel}. You can afford ${totalAffordable} (${planUnits} in plan + ${affordable} from balance). Top up or reduce batch size.`,
+      code: 'INSUFFICIENT_BALANCE',
+      details: { used, limit, pricePerUnit: price, currentBalance: freshUser.topUpBalance, requested: count, affordable: totalAffordable },
+    };
+  }
+
+  // Deduct usage + balance
+  const updateData: Record<string, unknown> = {
+    [usedField]: { increment: count },
+  };
+  if (overageCost > 0) {
+    updateData.topUpBalance = { decrement: overageCost };
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+  });
+
+  return { ok: true, planUnits, topUpUnits: overageUnits, topUpCost: overageCost };
+}
+
+/**
  * Reset usage counters for a user. Called when subscription renews.
  */
 export async function resetUsageCounters(userId: string): Promise<void> {

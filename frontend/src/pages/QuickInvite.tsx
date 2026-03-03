@@ -77,7 +77,7 @@ type Step = 'setup' | 'review' | 'results';
 
 export default function QuickInvite() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const jdFileInputRef = useRef<HTMLInputElement>(null);
@@ -150,6 +150,12 @@ export default function QuickInvite() {
 
   // Generate unique ID
   const genId = () => Math.random().toString(36).slice(2, 10);
+  const createPastedResumeEntry = (text: string, index: number): ResumeEntry => ({
+    id: genId(),
+    fileName: t('pages.quickInvite.pastedResume', { num: index }),
+    text: text.trim(),
+    status: 'ready',
+  });
 
   // Upload JD file (PDF, DOCX, XLSX, TXT)
   const handleJdFileUpload = async (files: FileList | null) => {
@@ -236,16 +242,9 @@ export default function QuickInvite() {
 
   // Add resume from paste
   const handleAddPaste = () => {
-    if (!pasteText.trim()) return;
-    setResumes(prev => [
-      ...prev,
-      {
-        id: genId(),
-        fileName: t('pages.quickInvite.pastedResume', { num: prev.length + 1 }),
-        text: pasteText.trim(),
-        status: 'ready',
-      },
-    ]);
+    const trimmedPaste = pasteText.trim();
+    if (!trimmedPaste) return;
+    setResumes(prev => [...prev, createPastedResumeEntry(trimmedPaste, prev.length + 1)]);
     setPasteText('');
     setPasteMode(false);
   };
@@ -262,6 +261,15 @@ export default function QuickInvite() {
       return;
     }
     const readyResumes = resumes.filter(r => r.status === 'ready' && r.text.trim());
+    const trimmedPaste = pasteText.trim();
+    if (trimmedPaste) {
+      const pastedEntry = createPastedResumeEntry(trimmedPaste, resumes.length + 1);
+      readyResumes.push(pastedEntry);
+      setResumes(prev => [...prev, pastedEntry]);
+      setPasteText('');
+      setPasteMode(false);
+    }
+
     if (readyResumes.length === 0) {
       setError(t('pages.quickInvite.errorNoResumes'));
       return;
@@ -286,66 +294,61 @@ export default function QuickInvite() {
       )
     );
 
-    // Send batch request
-    try {
-      const response = await axios.post('/api/v1/batch-invite', {
-        resumes: readyResumes.map(r => r.text),
-        jd,
-        recruiter_email: recruiterEmail,
-        interviewer_requirement: interviewerRequirement || undefined,
-      });
+    // Send each resume individually via /api/v1/invite-candidate
+    let stopped = false;
+    for (const entry of readyResumes) {
+      if (stopped) {
+        // Mark remaining as ready (not sent) if we stopped early
+        setResumes(prev =>
+          prev.map(r => r.id === entry.id && r.status === 'sending' ? { ...r, status: 'ready' as const } : r)
+        );
+        continue;
+      }
 
-      const batchResults = response.data?.data?.results || [];
-
-      // Map results back to resume entries
-      setResumes(prev => {
-        const readyIds = prev
-          .filter(r => r.status === 'sending')
-          .map(r => r.id);
-
-        return prev.map(r => {
-          const idx = readyIds.indexOf(r.id);
-          if (idx === -1) return r;
-
-          const batchResult = batchResults[idx];
-          if (!batchResult) return { ...r, status: 'error' as const, error: 'No result returned' };
-
-          if (batchResult.success) {
-            return {
-              ...r,
-              status: 'sent' as const,
-              result: batchResult.data,
-            };
-          } else {
-            return {
-              ...r,
-              status: 'error' as const,
-              error: batchResult.error || 'Failed',
-            };
-          }
+      try {
+        const response = await axios.post('/api/v1/invite-candidate', {
+          resume: entry.text,
+          jd,
+          recruiter_email: recruiterEmail,
+          interviewer_requirement: interviewerRequirement || undefined,
         });
-      });
 
-      setStep('results');
-    } catch (err) {
-      const msg = axios.isAxiosError(err)
-        ? err.response?.data?.error || err.message
-        : String(err);
-      setError(msg);
+        if (response.data?.success && response.data.data) {
+          setResumes(prev =>
+            prev.map(r => r.id === entry.id ? { ...r, status: 'sent' as const, result: response.data.data } : r)
+          );
+        } else {
+          setResumes(prev =>
+            prev.map(r => r.id === entry.id ? { ...r, status: 'error' as const, error: response.data?.error || 'Failed' } : r)
+          );
+        }
+      } catch (err) {
+        const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+        const msg = axios.isAxiosError(err)
+          ? err.response?.data?.error || err.message
+          : String(err);
 
-      // Reset sending status
-      setResumes(prev =>
-        prev.map(r =>
-          r.status === 'sending' ? { ...r, status: 'ready' as const } : r
-        )
-      );
-    } finally {
-      setSending(false);
+        setResumes(prev =>
+          prev.map(r => r.id === entry.id ? { ...r, status: 'error' as const, error: msg } : r)
+        );
+
+        // Stop sending remaining resumes on 402 (usage limit exceeded)
+        if (status === 402) {
+          stopped = true;
+          setError(msg);
+        }
+      }
     }
+
+    setStep('results');
+    setSending(false);
+    void refreshUser();
   };
 
   // Stats
-  const readyCount = resumes.filter(r => r.status === 'ready' && r.text.trim()).length;
+  const readyCount =
+    resumes.filter(r => r.status === 'ready' && r.text.trim()).length +
+    (pasteText.trim() ? 1 : 0);
   const sentCount = resumes.filter(r => r.status === 'sent').length;
   const errorCount = resumes.filter(r => r.status === 'error').length;
 
@@ -887,10 +890,10 @@ export default function QuickInvite() {
                 {t('pages.quickInvite.startNew')}
               </button>
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/dashboard/resumes')}
                 className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors"
               >
-                {t('pages.quickInvite.goToDashboard')}
+                {t('pages.quickInvite.viewResumeLibrary')}
               </button>
             </div>
           </div>

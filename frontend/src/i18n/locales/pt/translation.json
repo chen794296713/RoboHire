@@ -1099,6 +1099,7 @@
       "statusPending": "Pendente",
       "startNew": "Iniciar novo lote",
       "goToDashboard": "Ir para o painel",
+      "viewResumeLibrary": "Ver biblioteca de currículos",
       "authRequired": "Login necessário",
       "authRequiredDesc": "Você precisa fazer login para enviar convites para entrevistas.",
       "errorNoJd": "Por favor, insira uma descrição da vaga.",

@@ -1099,6 +1099,7 @@
       "statusPending": "Pendiente",
       "startNew": "Iniciar nuevo lote",
       "goToDashboard": "Ir al panel",
+      "viewResumeLibrary": "Ver biblioteca de currículos",
       "authRequired": "Inicio de sesión requerido",
       "authRequiredDesc": "Necesitas iniciar sesión para enviar invitaciones a entrevistas.",
       "errorNoJd": "Por favor ingresa una descripción del puesto.",

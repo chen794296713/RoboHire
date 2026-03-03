@@ -1150,6 +1150,7 @@
       "statusPending": "Pending",
       "startNew": "Start New Batch",
       "goToDashboard": "Go to Dashboard",
+      "viewResumeLibrary": "View Resume Library",
       "authRequired": "Sign In Required",
       "authRequiredDesc": "You need to sign in to send interview invitations.",
       "errorNoJd": "Please enter a job description.",

@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
+import crypto from 'crypto';
 import { resumeMatchAgent } from '../agents/ResumeMatchAgent.js';
 import { inviteAgent } from '../agents/InviteAgent.js';
 import { resumeParseAgent } from '../agents/ResumeParseAgent.js';
@@ -14,13 +15,19 @@ import { documentStorage } from '../services/DocumentStorageService.js';
 import { requireAuth, requireScopes } from '../middleware/auth.js';
 import { trackUsage } from '../middleware/usageTracker.js';
 import { apiRateLimit } from '../middleware/rateLimiter.js';
-import { checkUsageLimit } from '../middleware/usageMeter.js';
+import { checkUsageLimit, checkBatchUsage } from '../middleware/usageMeter.js';
+import prisma from '../lib/prisma.js';
 import {
   MatchResumeRequest,
   InviteCandidateRequest,
   EvaluateInterviewRequest,
   APIResponse,
 } from '../types/index.js';
+
+function computeContentHash(text: string): string {
+  const normalized = text.trim().toLowerCase().replace(/\s+/g, ' ');
+  return crypto.createHash('sha256').update(normalized).digest('hex').substring(0, 16);
+}
 
 const router = Router();
 
@@ -171,10 +178,92 @@ router.post('/invite-candidate', requireAuth, requireScopes('write'), apiRateLim
       responsePayload: result as unknown as Record<string, unknown>,
     };
 
+    // Step 3: Persist resume, hiring request, and invitation to database
+    let resumeId: string | undefined;
+    let hiringRequestId: string | undefined;
+    if (req.user?.id) {
+      try {
+        const userId = req.user.id;
+        const persistStep = logger.startStep(requestId, 'Persist invitation data');
+
+        // Parse resume with AI
+        const parsed = await resumeParseAgent.parse(resume, requestId);
+
+        // Upsert Resume record (dedup by content hash)
+        const contentHash = computeContentHash(resume);
+        const resumeRecord = await prisma.resume.upsert({
+          where: { userId_contentHash: { userId, contentHash } },
+          create: {
+            userId,
+            name: parsed.name || result.name || 'Unknown',
+            email: parsed.email || result.email || null,
+            phone: parsed.phone || null,
+            currentRole: (parsed.experience as Array<{ role?: string }>)?.[0]?.role || null,
+            resumeText: resume,
+            parsedData: JSON.parse(JSON.stringify(parsed)),
+            contentHash,
+            source: 'quick-invite',
+          },
+          update: {},
+        });
+        resumeId = resumeRecord.id;
+
+        // Find or create HiringRequest from JD (dedup by exact JD content)
+        let hiringRequest = await prisma.hiringRequest.findFirst({
+          where: { userId, jobDescription: jd.trim() },
+          select: { id: true },
+        });
+        if (!hiringRequest) {
+          hiringRequest = await prisma.hiringRequest.create({
+            data: {
+              userId,
+              title: result.job_title || 'Quick Invite Position',
+              requirements: jd.trim(),
+              jobDescription: jd.trim(),
+            },
+            select: { id: true },
+          });
+        }
+        hiringRequestId = hiringRequest.id;
+
+        // Upsert ResumeJobFit with invited status
+        await prisma.resumeJobFit.upsert({
+          where: {
+            resumeId_hiringRequestId: {
+              resumeId: resumeRecord.id,
+              hiringRequestId: hiringRequest.id,
+            },
+          },
+          create: {
+            resumeId: resumeRecord.id,
+            hiringRequestId: hiringRequest.id,
+            pipelineStatus: 'invited',
+            invitedAt: new Date(),
+            inviteData: JSON.parse(JSON.stringify(result)),
+          },
+          update: {
+            pipelineStatus: 'invited',
+            invitedAt: new Date(),
+            inviteData: JSON.parse(JSON.stringify(result)),
+          },
+        });
+
+        logger.endStep(requestId, persistStep, 'completed', {
+          resumeId: resumeRecord.id,
+          hiringRequestId: hiringRequest.id,
+        });
+      } catch (persistError) {
+        // Log but don't fail the invitation — persistence is best-effort
+        logger.error('API', 'invite-candidate persistence failed', {
+          error: persistError instanceof Error ? persistError.message : String(persistError),
+        }, requestId);
+      }
+    }
+
     logger.endRequest(requestId, 'success', 200);
     return res.json({
       success: true,
-      data: result,
+      data: { ...result, resumeId, hiringRequestId },
       requestId,
     });
   } catch (error) {
@@ -653,7 +742,7 @@ router.get('/logs', async (_req: Request, res: Response) => {
  * Each resume counts as one interview usage.
  * Accepts JSON body: { resumes: string[], jd: string, recruiter_email?, interviewer_requirement? }
  */
-router.post('/batch-invite', requireAuth, requireScopes('write'), apiRateLimit(), async (req: Request, res: Response) => {
+router.post('/batch-invite', requireAuth, requireScopes('write'), apiRateLimit(), trackUsage, async (req: Request, res: Response) => {
   const requestId = req.requestId!;
   logger.startRequest(requestId, '/api/v1/batch-invite', 'POST');
 
@@ -683,33 +772,70 @@ router.post('/batch-invite', requireAuth, requireScopes('write'), apiRateLimit()
       });
     }
 
-    // Process each resume — usage billing is handled per-invite
+    // Filter valid resumes first so we only bill for non-empty entries
+    const validResumes = resumes.map((r, i) => ({ text: r, index: i })).filter(r => r.text && r.text.trim());
+    if (validResumes.length === 0) {
+      logger.endRequest(requestId, 'error', 400);
+      return res.status(400).json({
+        success: false,
+        error: 'All resumes are empty',
+        requestId,
+      });
+    }
+
+    // Check and deduct usage for all valid resumes upfront
+    const usageCheck = await checkBatchUsage(req.user!.id, 'interview', validResumes.length);
+    if (!usageCheck.ok) {
+      logger.endRequest(requestId, 'error', 402);
+      return res.status(402).json({
+        success: false,
+        error: usageCheck.error,
+        code: usageCheck.code,
+        details: usageCheck.details,
+        requestId,
+      });
+    }
+
+    (req as any).usageBilling = {
+      source: usageCheck.topUpUnits > 0 ? 'topup' : 'plan',
+      action: 'interview',
+      count: validResumes.length,
+      planUnits: usageCheck.planUnits,
+      topUpUnits: usageCheck.topUpUnits,
+      topUpCost: usageCheck.topUpCost,
+    };
+
+    // Process each resume
     const results: Array<{ index: number; success: boolean; data?: any; error?: string }> = [];
 
+    // Mark empty resumes as failed
     for (let i = 0; i < resumes.length; i++) {
-      const resume = resumes[i];
-      if (!resume || !resume.trim()) {
+      if (!resumes[i] || !resumes[i].trim()) {
         results.push({ index: i, success: false, error: 'Empty resume text' });
-        continue;
       }
+    }
 
+    for (const { text, index } of validResumes) {
       try {
         const result = await inviteAgent.generateInvitation(
-          resume,
+          text,
           jd,
-          `${requestId}_${i}`,
+          `${requestId}_${index}`,
           recruiter_email,
           interviewer_requirement
         );
-        results.push({ index: i, success: true, data: result });
+        results.push({ index, success: true, data: result });
       } catch (error) {
         results.push({
-          index: i,
+          index,
           success: false,
           error: error instanceof Error ? error.message : 'Failed to send invitation',
         });
       }
     }
+
+    // Sort by index for consistent output
+    results.sort((a, b) => a.index - b.index);
 
     const successCount = results.filter(r => r.success).length;
     const failCount = results.filter(r => !r.success).length;
@@ -721,6 +847,12 @@ router.post('/batch-invite', requireAuth, requireScopes('write'), apiRateLimit()
         total: resumes.length,
         sent: successCount,
         failed: failCount,
+        billing: {
+          charged: validResumes.length,
+          planUnits: usageCheck.planUnits,
+          topUpUnits: usageCheck.topUpUnits,
+          topUpCost: usageCheck.topUpCost,
+        },
         results,
       },
       requestId,

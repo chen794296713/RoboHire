@@ -1099,6 +1099,7 @@
       "statusPending": "Ausstehend",
       "startNew": "Neuen Batch starten",
       "goToDashboard": "Zum Dashboard",
+      "viewResumeLibrary": "Lebenslauf-Bibliothek anzeigen",
       "authRequired": "Anmeldung erforderlich",
       "authRequiredDesc": "Sie müssen sich anmelden, um Interview-Einladungen zu senden.",
       "errorNoJd": "Bitte geben Sie eine Stellenbeschreibung ein.",

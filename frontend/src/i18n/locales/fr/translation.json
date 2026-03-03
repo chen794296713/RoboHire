@@ -1099,6 +1099,7 @@
       "statusPending": "En attente",
       "startNew": "Démarrer un nouveau lot",
       "goToDashboard": "Aller au tableau de bord",
+      "viewResumeLibrary": "Voir la bibliothèque de CV",
       "authRequired": "Connexion requise",
       "authRequiredDesc": "Vous devez vous connecter pour envoyer des invitations à l'entretien.",
       "errorNoJd": "Veuillez saisir une description de poste.",

@@ -1151,6 +1151,7 @@
       "statusPending": "待处理",
       "startNew": "开始新一批",
       "goToDashboard": "前往控制面板",
+      "viewResumeLibrary": "查看简历库",
       "authRequired": "需要登录",
       "authRequiredDesc": "您需要登录才能发送面试邀请。",
       "errorNoJd": "请输入职位描述。",

@@ -188,51 +188,46 @@ router.post('/users/:userId/adjust-balance', async (req, res) => {
       return;
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.findUnique({
-        where: { id: req.params.userId },
-        select: { id: true, topUpBalance: true },
-      });
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.userId },
+      select: { id: true, topUpBalance: true },
+    });
 
-      if (!user) throw new Error('USER_NOT_FOUND');
+    if (!user) {
+      res.status(404).json({ success: false, error: 'User not found' });
+      return;
+    }
 
-      const oldBalance = user.topUpBalance;
-      const newBalance = Math.max(0, oldBalance + amount); // Never go negative
+    const oldBalance = user.topUpBalance;
+    const newBalance = Math.max(0, oldBalance + amount); // Never go negative
 
-      const updatedUser = await tx.user.update({
-        where: { id: user.id },
-        data: { topUpBalance: newBalance },
-        select: { id: true, topUpBalance: true },
-      });
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { topUpBalance: newBalance },
+      select: { id: true, topUpBalance: true },
+    });
 
-      await tx.adminAdjustment.create({
-        data: {
-          userId: user.id,
-          adminId: req.user!.id,
-          type: 'balance',
-          amount,
-          oldValue: oldBalance.toFixed(2),
-          newValue: newBalance.toFixed(2),
-          reason: reason.trim(),
-        },
-      });
-
-      return { oldBalance, newBalance: updatedUser.topUpBalance };
+    await prisma.adminAdjustment.create({
+      data: {
+        userId: user.id,
+        adminId: req.user!.id,
+        type: 'balance',
+        amount,
+        oldValue: oldBalance.toFixed(2),
+        newValue: newBalance.toFixed(2),
+        reason: reason.trim(),
+      },
     });
 
     res.json({
       success: true,
       data: {
-        oldBalance: result.oldBalance,
-        newBalance: result.newBalance,
+        oldBalance,
+        newBalance: updatedUser.topUpBalance,
         adjustment: amount,
       },
     });
   } catch (error) {
-    if (error instanceof Error && error.message === 'USER_NOT_FOUND') {
-      res.status(404).json({ success: false, error: 'User not found' });
-      return;
-    }
     console.error('Admin adjust balance error:', error);
     res.status(500).json({ success: false, error: 'Failed to adjust balance' });
   }
@@ -264,52 +259,47 @@ router.post('/users/:userId/adjust-usage', async (req, res) => {
     const field = action === 'interview' ? 'interviewsUsed' : 'resumeMatchesUsed';
     const adjustmentType = action === 'interview' ? 'usage_interview' : 'usage_match';
 
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.findUnique({
-        where: { id: req.params.userId },
-        select: { id: true, interviewsUsed: true, resumeMatchesUsed: true },
-      });
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.userId },
+      select: { id: true, interviewsUsed: true, resumeMatchesUsed: true },
+    });
 
-      if (!user) throw new Error('USER_NOT_FOUND');
+    if (!user) {
+      res.status(404).json({ success: false, error: 'User not found' });
+      return;
+    }
 
-      const oldValue = user[field];
-      const newValue = Math.max(0, oldValue + amount); // Never go negative
+    const oldValue = user[field];
+    const newValue = Math.max(0, oldValue + amount); // Never go negative
 
-      const updatedUser = await tx.user.update({
-        where: { id: user.id },
-        data: { [field]: newValue },
-        select: { id: true, interviewsUsed: true, resumeMatchesUsed: true },
-      });
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { [field]: newValue },
+      select: { id: true, interviewsUsed: true, resumeMatchesUsed: true },
+    });
 
-      await tx.adminAdjustment.create({
-        data: {
-          userId: user.id,
-          adminId: req.user!.id,
-          type: adjustmentType,
-          amount,
-          oldValue: String(oldValue),
-          newValue: String(newValue),
-          reason: reason.trim(),
-        },
-      });
-
-      return { oldValue, newValue: updatedUser[field] };
+    await prisma.adminAdjustment.create({
+      data: {
+        userId: user.id,
+        adminId: req.user!.id,
+        type: adjustmentType,
+        amount,
+        oldValue: String(oldValue),
+        newValue: String(newValue),
+        reason: reason.trim(),
+      },
     });
 
     res.json({
       success: true,
       data: {
         action,
-        oldValue: result.oldValue,
-        newValue: result.newValue,
+        oldValue,
+        newValue: updatedUser[field],
         adjustment: amount,
       },
     });
   } catch (error) {
-    if (error instanceof Error && error.message === 'USER_NOT_FOUND') {
-      res.status(404).json({ success: false, error: 'User not found' });
-      return;
-    }
     console.error('Admin adjust usage error:', error);
     res.status(500).json({ success: false, error: 'Failed to adjust usage' });
   }
@@ -341,52 +331,49 @@ router.post('/users/:userId/set-subscription', async (req, res) => {
       return;
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.findUnique({
-        where: { id: req.params.userId },
-        select: { id: true, subscriptionTier: true, subscriptionStatus: true },
-      });
-
-      if (!user) throw new Error('USER_NOT_FOUND');
-
-      const oldValue = JSON.stringify({ tier: user.subscriptionTier, status: user.subscriptionStatus });
-
-      const updateData: Record<string, string> = { subscriptionTier: tier };
-      if (status) updateData.subscriptionStatus = status;
-
-      const updatedUser = await tx.user.update({
-        where: { id: user.id },
-        data: updateData,
-        select: { id: true, subscriptionTier: true, subscriptionStatus: true },
-      });
-
-      const newValue = JSON.stringify({ tier: updatedUser.subscriptionTier, status: updatedUser.subscriptionStatus });
-
-      await tx.adminAdjustment.create({
-        data: {
-          userId: user.id,
-          adminId: req.user!.id,
-          type: 'subscription',
-          oldValue,
-          newValue,
-          reason: reason.trim(),
-        },
-      });
-
-      return {
-        oldTier: user.subscriptionTier,
-        oldStatus: user.subscriptionStatus,
-        newTier: updatedUser.subscriptionTier,
-        newStatus: updatedUser.subscriptionStatus,
-      };
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.userId },
+      select: { id: true, subscriptionTier: true, subscriptionStatus: true },
     });
 
-    res.json({ success: true, data: result });
-  } catch (error) {
-    if (error instanceof Error && error.message === 'USER_NOT_FOUND') {
+    if (!user) {
       res.status(404).json({ success: false, error: 'User not found' });
       return;
     }
+
+    const oldValue = JSON.stringify({ tier: user.subscriptionTier, status: user.subscriptionStatus });
+
+    const updateData: Record<string, string> = { subscriptionTier: tier };
+    if (status) updateData.subscriptionStatus = status;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: updateData,
+      select: { id: true, subscriptionTier: true, subscriptionStatus: true },
+    });
+
+    const newValue = JSON.stringify({ tier: updatedUser.subscriptionTier, status: updatedUser.subscriptionStatus });
+
+    await prisma.adminAdjustment.create({
+      data: {
+        userId: user.id,
+        adminId: req.user!.id,
+        type: 'subscription',
+        oldValue,
+        newValue,
+        reason: reason.trim(),
+      },
+    });
+
+    const result = {
+      oldTier: user.subscriptionTier,
+      oldStatus: user.subscriptionStatus,
+      newTier: updatedUser.subscriptionTier,
+      newStatus: updatedUser.subscriptionStatus,
+    };
+
+    res.json({ success: true, data: result });
+  } catch (error) {
     console.error('Admin set subscription error:', error);
     res.status(500).json({ success: false, error: 'Failed to set subscription' });
   }
@@ -427,57 +414,56 @@ router.post('/users/:userId/set-limits', async (req, res) => {
       return;
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.findUnique({
-        where: { id: req.params.userId },
-        select: { id: true, customMaxInterviews: true, customMaxMatches: true },
-      });
-
-      if (!user) throw new Error('USER_NOT_FOUND');
-
-      const oldValue = JSON.stringify({
-        maxInterviews: user.customMaxInterviews,
-        maxMatches: user.customMaxMatches,
-      });
-
-      const updateData: Record<string, number | null> = {};
-      if (maxInterviews !== undefined) updateData.customMaxInterviews = maxInterviews;
-      if (maxMatches !== undefined) updateData.customMaxMatches = maxMatches;
-
-      const updatedUser = await tx.user.update({
-        where: { id: user.id },
-        data: updateData,
-        select: { id: true, customMaxInterviews: true, customMaxMatches: true },
-      });
-
-      const newValue = JSON.stringify({
-        maxInterviews: updatedUser.customMaxInterviews,
-        maxMatches: updatedUser.customMaxMatches,
-      });
-
-      await tx.adminAdjustment.create({
-        data: {
-          userId: user.id,
-          adminId: req.user!.id,
-          type: 'limits',
-          oldValue,
-          newValue,
-          reason: reason.trim(),
-        },
-      });
-
-      return {
-        old: { maxInterviews: user.customMaxInterviews, maxMatches: user.customMaxMatches },
-        new: { maxInterviews: updatedUser.customMaxInterviews, maxMatches: updatedUser.customMaxMatches },
-      };
+    // Avoid interactive $transaction — Neon serverless can timeout holding a connection.
+    // Use sequential queries instead.
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.userId },
+      select: { id: true, customMaxInterviews: true, customMaxMatches: true },
     });
 
-    res.json({ success: true, data: result });
-  } catch (error) {
-    if (error instanceof Error && error.message === 'USER_NOT_FOUND') {
+    if (!user) {
       res.status(404).json({ success: false, error: 'User not found' });
       return;
     }
+
+    const oldValue = JSON.stringify({
+      maxInterviews: user.customMaxInterviews,
+      maxMatches: user.customMaxMatches,
+    });
+
+    const updateData: Record<string, number | null> = {};
+    if (maxInterviews !== undefined) updateData.customMaxInterviews = maxInterviews;
+    if (maxMatches !== undefined) updateData.customMaxMatches = maxMatches;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: updateData,
+      select: { id: true, customMaxInterviews: true, customMaxMatches: true },
+    });
+
+    const newValue = JSON.stringify({
+      maxInterviews: updatedUser.customMaxInterviews,
+      maxMatches: updatedUser.customMaxMatches,
+    });
+
+    await prisma.adminAdjustment.create({
+      data: {
+        userId: user.id,
+        adminId: req.user!.id,
+        type: 'limits',
+        oldValue,
+        newValue,
+        reason: reason.trim(),
+      },
+    });
+
+    const result = {
+      old: { maxInterviews: user.customMaxInterviews, maxMatches: user.customMaxMatches },
+      new: { maxInterviews: updatedUser.customMaxInterviews, maxMatches: updatedUser.customMaxMatches },
+    };
+
+    res.json({ success: true, data: result });
+  } catch (error) {
     console.error('Admin set limits error:', error);
     res.status(500).json({ success: false, error: 'Failed to set limits' });
   }
@@ -497,20 +483,24 @@ router.post('/users/:userId/reset-usage', async (req, res) => {
       return;
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.findUnique({
-        where: { id: req.params.userId },
-        select: { id: true, interviewsUsed: true, resumeMatchesUsed: true },
-      });
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.userId },
+      select: { id: true, interviewsUsed: true, resumeMatchesUsed: true },
+    });
 
-      if (!user) throw new Error('USER_NOT_FOUND');
+    if (!user) {
+      res.status(404).json({ success: false, error: 'User not found' });
+      return;
+    }
 
-      await tx.user.update({
-        where: { id: user.id },
-        data: { interviewsUsed: 0, resumeMatchesUsed: 0 },
-      });
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { interviewsUsed: 0, resumeMatchesUsed: 0 },
+    });
 
-      await tx.adminAdjustment.create({
+    // Batch audit records using non-interactive transaction
+    const auditOps = [
+      prisma.adminAdjustment.create({
         data: {
           userId: user.id,
           adminId: req.user!.id,
@@ -520,10 +510,11 @@ router.post('/users/:userId/reset-usage', async (req, res) => {
           newValue: '0',
           reason: `[Reset] ${reason.trim()}`,
         },
-      });
-
-      if (user.resumeMatchesUsed > 0) {
-        await tx.adminAdjustment.create({
+      }),
+    ];
+    if (user.resumeMatchesUsed > 0) {
+      auditOps.push(
+        prisma.adminAdjustment.create({
           data: {
             userId: user.id,
             adminId: req.user!.id,
@@ -533,28 +524,21 @@ router.post('/users/:userId/reset-usage', async (req, res) => {
             newValue: '0',
             reason: `[Reset] ${reason.trim()}`,
           },
-        });
-      }
-
-      return {
-        oldInterviews: user.interviewsUsed,
-        oldMatches: user.resumeMatchesUsed,
-      };
-    });
+        }),
+      );
+    }
+    await prisma.$transaction(auditOps);
 
     res.json({
       success: true,
       data: {
-        ...result,
+        oldInterviews: user.interviewsUsed,
+        oldMatches: user.resumeMatchesUsed,
         newInterviews: 0,
         newMatches: 0,
       },
     });
   } catch (error) {
-    if (error instanceof Error && error.message === 'USER_NOT_FOUND') {
-      res.status(404).json({ success: false, error: 'User not found' });
-      return;
-    }
     console.error('Admin reset usage error:', error);
     res.status(500).json({ success: false, error: 'Failed to reset usage' });
   }
@@ -1347,27 +1331,34 @@ router.post('/config/limits', async (req, res) => {
 
     const adminId = req.user!.id;
 
-    await prisma.$transaction(async (tx) => {
-      for (const { key, value } of upserts) {
-        const existing = await tx.appConfig.findUnique({ where: { key } });
-        await tx.appConfig.upsert({
+    // Fetch all existing config values in a single query to minimize DB round-trips
+    // (Neon serverless can be slow per-query).
+    const existingRows = await prisma.appConfig.findMany({
+      where: { key: { in: upserts.map((u) => u.key) } },
+    });
+    const existingMap = new Map(existingRows.map((r) => [r.key, r.value]));
+
+    // Batch all upserts + audit records into a single $transaction (batch form, not interactive)
+    await prisma.$transaction(
+      upserts.flatMap(({ key, value }) => [
+        prisma.appConfig.upsert({
           where: { key },
           create: { key, value, updatedBy: adminId },
           update: { value, updatedBy: adminId },
-        });
-        await tx.adminAdjustment.create({
+        }),
+        prisma.adminAdjustment.create({
           data: {
             userId: adminId,
             adminId,
             type: 'limits',
             amount: Number(value),
-            oldValue: existing?.value ?? null,
+            oldValue: existingMap.get(key) ?? null,
             newValue: value,
             reason: `Admin updated ${key} to ${value}`,
           },
-        });
-      }
-    });
+        }),
+      ])
+    );
 
     clearLimitsCache();
 

@@ -3,10 +3,24 @@ import { logger } from '../services/LoggerService.js';
 import { llmService } from '../services/llm/LLMService.js';
 import { languageService } from '../services/LanguageService.js';
 
+const DEFAULT_ROBOHIRE_INVITATION_API = 'https://report-agent.gohire.top/instant/instant/v1/invitation';
+
+// Return the configured API URL or the default. The path `/instant/instant/v1/invitation` is correct per GoHire API docs.
+function normalizeInvitationApiUrl(raw?: string): string {
+  const configured = (raw || '').trim();
+  return configured || DEFAULT_ROBOHIRE_INVITATION_API;
+}
+
 // External invitation API – override via ROBOHIRE_INVITATION_API env var
-const ROBOHIRE_INVITATION_API =
-  process.env.ROBOHIRE_INVITATION_API ||
-  'https://api.gohire.top/instant/instant/v1/invitation';
+const RAW_ROBOHIRE_INVITATION_API = process.env.ROBOHIRE_INVITATION_API;
+const ROBOHIRE_INVITATION_API = normalizeInvitationApiUrl(RAW_ROBOHIRE_INVITATION_API);
+
+if (RAW_ROBOHIRE_INVITATION_API && ROBOHIRE_INVITATION_API !== RAW_ROBOHIRE_INVITATION_API.trim()) {
+  logger.warn('InviteAgent', 'Normalized ROBOHIRE_INVITATION_API', {
+    configured: RAW_ROBOHIRE_INVITATION_API,
+    normalized: ROBOHIRE_INVITATION_API,
+  });
+}
 
 /**
  * Agent for sending interview invitations via RoboHire 一键邀约 API
@@ -42,6 +56,7 @@ export class InviteAgent {
     };
 
     logger.info(this.agentName, 'Sending invitation request to RoboHire API', {
+      endpoint: ROBOHIRE_INVITATION_API,
       recruiter_email: email,
       jd_length: jd.length,
       resume_length: resume.length,

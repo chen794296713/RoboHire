@@ -330,6 +330,8 @@ model ResumeJobFit {
   fitGrade         String?
   fitData          Json?
   pipelineStatus   String   @default("matched") // matched, shortlisted, rejected, invited
+  invitedAt        DateTime?
+  inviteData       Json?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
