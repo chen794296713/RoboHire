@@ -111,7 +111,7 @@ router.post('/upload-batch', requireAuth, uploadDoc.array('files', 10), async (r
     if (!req.user) {
       return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
-    const files = req.files as Express.Multer.File[];
+    const files = req.files as Array<{ buffer: Buffer; mimetype: string; originalname: string; size: number }>;
     if (!files || files.length === 0) {
       return res.status(400).json({ success: false, error: 'No files uploaded' });
     }
