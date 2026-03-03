@@ -71,6 +71,7 @@ export interface WorkExperience {
   description?: string;
   achievements?: string[];
   technologies?: string[];
+  employmentType?: 'full-time' | 'part-time' | 'internship' | 'contract' | 'freelance';
 }
 
 export interface Project {
@@ -325,6 +326,25 @@ export interface MatchResult {
     cultureFitIndicators: string[];
     riskFactors: string[];
   };
+  transferableSkills?: Array<{
+    required: string;
+    candidateHas: string;
+    relevance: string;
+    valueFactor: number;
+  }>;
+  experienceBreakdown?: {
+    fullTimeExperience: string;
+    internshipExperience: string;
+    contractExperience?: string;
+    totalRelevantExperience: string;
+    note: string;
+  };
+  hardRequirementGaps?: Array<{
+    requirement: string;
+    severity: 'dealbreaker' | 'critical' | 'significant';
+    candidateStatus: string;
+    impact: string;
+  }>;
   overallMatchScore: {
     score: number;
     grade: string;
@@ -700,6 +720,18 @@ export interface JobFitResult {
     experienceAlignment: string;
     topReasons: string[];
     recommendation: string;
+    hardRequirementGaps?: Array<{
+      requirement: string;
+      severity: 'dealbreaker' | 'significant' | 'minor';
+      candidateStatus: string;
+    }>;
+    transferableSkills?: Array<{
+      required: string;
+      candidateHas: string;
+      relevance: string;
+    }>;
+    fullTimeExperience?: string;
+    internshipExperience?: string;
   }>;
   bestFit: {
     hiringRequestId: string;

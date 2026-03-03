@@ -92,6 +92,8 @@ router.get('/users', async (req, res) => {
           topUpBalance: true,
           currentPeriodEnd: true,
           trialEnd: true,
+          customMaxInterviews: true,
+          customMaxMatches: true,
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -140,6 +142,8 @@ router.get('/users/:userId', async (req, res) => {
         interviewsUsed: true,
         resumeMatchesUsed: true,
         topUpBalance: true,
+        customMaxInterviews: true,
+        customMaxMatches: true,
       },
     });
 
@@ -384,6 +388,97 @@ router.post('/users/:userId/set-subscription', async (req, res) => {
     }
     console.error('Admin set subscription error:', error);
     res.status(500).json({ success: false, error: 'Failed to set subscription' });
+  }
+});
+
+/**
+ * POST /api/v1/admin/users/:userId/set-limits
+ * Override a user's maximum API call limits (interviews & matches)
+ * Body: { maxInterviews?: number | null, maxMatches?: number | null, reason: string }
+ * Pass null to clear an override and revert to plan defaults.
+ */
+router.post('/users/:userId/set-limits', async (req, res) => {
+  try {
+    const { maxInterviews, maxMatches, reason } = req.body;
+
+    if (!reason || typeof reason !== 'string' || reason.trim().length === 0) {
+      res.status(400).json({ success: false, error: 'reason is required' });
+      return;
+    }
+
+    // Validate: must be null or a non-negative integer
+    const validate = (v: unknown, name: string) => {
+      if (v === null || v === undefined) return; // clearing override
+      if (typeof v !== 'number' || !Number.isInteger(v) || v < 0) {
+        throw new Error(`${name} must be null or a non-negative integer`);
+      }
+    };
+    try {
+      validate(maxInterviews, 'maxInterviews');
+      validate(maxMatches, 'maxMatches');
+    } catch (e) {
+      res.status(400).json({ success: false, error: (e as Error).message });
+      return;
+    }
+
+    if (maxInterviews === undefined && maxMatches === undefined) {
+      res.status(400).json({ success: false, error: 'Provide at least one of maxInterviews or maxMatches' });
+      return;
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: req.params.userId },
+        select: { id: true, customMaxInterviews: true, customMaxMatches: true },
+      });
+
+      if (!user) throw new Error('USER_NOT_FOUND');
+
+      const oldValue = JSON.stringify({
+        maxInterviews: user.customMaxInterviews,
+        maxMatches: user.customMaxMatches,
+      });
+
+      const updateData: Record<string, number | null> = {};
+      if (maxInterviews !== undefined) updateData.customMaxInterviews = maxInterviews;
+      if (maxMatches !== undefined) updateData.customMaxMatches = maxMatches;
+
+      const updatedUser = await tx.user.update({
+        where: { id: user.id },
+        data: updateData,
+        select: { id: true, customMaxInterviews: true, customMaxMatches: true },
+      });
+
+      const newValue = JSON.stringify({
+        maxInterviews: updatedUser.customMaxInterviews,
+        maxMatches: updatedUser.customMaxMatches,
+      });
+
+      await tx.adminAdjustment.create({
+        data: {
+          userId: user.id,
+          adminId: req.user!.id,
+          type: 'limits',
+          oldValue,
+          newValue,
+          reason: reason.trim(),
+        },
+      });
+
+      return {
+        old: { maxInterviews: user.customMaxInterviews, maxMatches: user.customMaxMatches },
+        new: { maxInterviews: updatedUser.customMaxInterviews, maxMatches: updatedUser.customMaxMatches },
+      };
+    });
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'USER_NOT_FOUND') {
+      res.status(404).json({ success: false, error: 'User not found' });
+      return;
+    }
+    console.error('Admin set limits error:', error);
+    res.status(500).json({ success: false, error: 'Failed to set limits' });
   }
 });
 

@@ -1146,7 +1146,9 @@
         "experience": "Experiencia Laboral",
         "education": "Educación",
         "certifications": "Certificaciones",
-        "projects": "Proyectos"
+        "projects": "Proyectos",
+        "showAllSkills": "Mostrar las {{count}} habilidades",
+        "showLess": "Mostrar menos"
       }
     },
     "insights": {
@@ -1174,7 +1176,11 @@
       "missingSkills": "Habilidades Críticas Faltantes",
       "recommendation": "Recomendación",
       "noActiveRequests": "No se encontraron solicitudes de contratación activas",
-      "noActiveRequestsDesc": "Crea primero una solicitud de contratación para ver el análisis de ajuste"
+      "noActiveRequestsDesc": "Crea primero una solicitud de contratación para ver el análisis de ajuste",
+      "fullTime": "Tiempo completo",
+      "internship": "Pasantía",
+      "hardGaps": "Requisitos obligatorios faltantes",
+      "transferable": "Habilidades transferibles"
     },
     "notes": {
       "tags": "Etiquetas",

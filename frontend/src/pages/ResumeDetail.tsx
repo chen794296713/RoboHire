@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from '../lib/axios';
 import SEO from '../components/SEO';
+import ResumeUploadModal from '../components/ResumeUploadModal';
 
 type Tab = 'overview' | 'insights' | 'jobfit' | 'notes';
 
@@ -43,29 +44,38 @@ export default function ResumeDetail() {
   const [notesValue, setNotesValue] = useState('');
   const [tagsValue, setTagsValue] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [replaceUploadOpen, setReplaceUploadOpen] = useState(false);
 
-  useEffect(() => {
+  const fetchResume = useCallback(async () => {
     if (!id) return;
     setLoading(true);
-    axios.get(`/api/v1/resumes/${id}`)
-      .then(res => {
-        if (res.data.success) {
-          setResume(res.data.data);
-          setNotesValue(res.data.data.notes || '');
-          setTagsValue((res.data.data.tags || []).join(', '));
-        } else {
-          setError(res.data.error || 'Not found');
-        }
-      })
-      .catch(err => setError(err.response?.data?.error || err.message))
-      .finally(() => setLoading(false));
+    setError(null);
+    try {
+      const res = await axios.get(`/api/v1/resumes/${id}`);
+      if (res.data.success) {
+        setResume(res.data.data);
+        setNotesValue(res.data.data.notes || '');
+        setTagsValue((res.data.data.tags || []).join(', '));
+      } else {
+        setError(res.data.error || 'Not found');
+      }
+    } catch (err) {
+      setError(axios.isAxiosError(err) ? err.response?.data?.error || err.message : 'Failed to load resume');
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  const generateInsights = async () => {
+  useEffect(() => {
+    fetchResume();
+  }, [fetchResume]);
+
+  const generateInsights = async (force = false) => {
     if (!resume) return;
     setInsightLoading(true);
     try {
-      const res = await axios.post(`/api/v1/resumes/${resume.id}/insights`);
+      const query = force ? '?force=true' : '';
+      const res = await axios.post(`/api/v1/resumes/${resume.id}/insights${query}`);
       if (res.data.success) {
         setResume(prev => prev ? { ...prev, insightData: res.data.data } : prev);
       }
@@ -155,19 +165,45 @@ export default function ResumeDetail() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">{resume.name}</h1>
-            {resume.currentRole && <p className="text-sm text-gray-500 mt-1">{resume.currentRole}</p>}
-            <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+            {resume.currentRole && <p className="text-sm text-gray-600 mt-1">{resume.currentRole}</p>}
+            <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
               {resume.email && <span>{resume.email}</span>}
               {resume.phone && <span>{resume.phone}</span>}
               {resume.fileName && <span>{resume.fileName}</span>}
             </div>
           </div>
-          <button
-            onClick={handleArchive}
-            className="text-xs text-red-500 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
-          >
-            {t('resumeLibrary.detail.actions.archive', 'Archive')}
-          </button>
+          <div className="flex flex-wrap justify-end gap-2">
+            <button
+              onClick={() => generateInsights(true)}
+              disabled={insightLoading}
+              className="text-xs text-indigo-600 hover:text-indigo-700 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 transition-colors disabled:opacity-60"
+            >
+              {insightLoading
+                ? t('resumeLibrary.detail.actions.regeneratingInsights', 'Regenerating...')
+                : t('resumeLibrary.detail.actions.regenerateInsights', 'Re-generate Insights')}
+            </button>
+            <button
+              onClick={analyzeJobFit}
+              disabled={jobFitLoading}
+              className="text-xs text-blue-600 hover:text-blue-700 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors disabled:opacity-60"
+            >
+              {jobFitLoading
+                ? t('resumeLibrary.detail.actions.rematchingJobs', 'Re-matching...')
+                : t('resumeLibrary.detail.actions.rematchJobs', 'Re-match Jobs')}
+            </button>
+            <button
+              onClick={() => setReplaceUploadOpen(true)}
+              className="text-xs text-amber-700 hover:text-amber-800 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 transition-colors"
+            >
+              {t('resumeLibrary.detail.actions.reupload', 'Re-upload & Overwrite')}
+            </button>
+            <button
+              onClick={handleArchive}
+              className="text-xs text-red-500 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              {t('resumeLibrary.detail.actions.archive', 'Archive')}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -188,7 +224,7 @@ export default function ResumeDetail() {
 
       {/* Tab content */}
       {tab === 'overview' && <OverviewTab parsed={parsed} t={t} />}
-      {tab === 'insights' && <InsightsTab data={resume.insightData} loading={insightLoading} onGenerate={generateInsights} t={t} />}
+      {tab === 'insights' && <InsightsTab data={resume.insightData} loading={insightLoading} onGenerate={() => generateInsights(true)} t={t} />}
       {tab === 'jobfit' && <JobFitTab data={resume.jobFitData} loading={jobFitLoading} onAnalyze={analyzeJobFit} t={t} />}
       {tab === 'notes' && (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -222,13 +258,25 @@ export default function ResumeDetail() {
           </button>
         </div>
       )}
+
+      <ResumeUploadModal
+        open={replaceUploadOpen}
+        onClose={() => setReplaceUploadOpen(false)}
+        onUploaded={() => {
+          setReplaceUploadOpen(false);
+          setTab('overview');
+          fetchResume();
+        }}
+        replaceResumeId={resume.id}
+      />
     </div>
   );
 }
 
 // ─── Overview Tab ────────────────────────────────────────────────────────
 
-function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t: (k: string, f: string) => string }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t: (k: string, f?: any) => string }) {
   if (!parsed) return <div className="text-center py-12 text-gray-500">No parsed data available</div>;
 
   const summary = parsed.summary as string | undefined;
@@ -251,6 +299,12 @@ function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t:
     }
   }
 
+  const [skillsExpanded, setSkillsExpanded] = useState(false);
+  const SKILLS_COLLAPSE_LIMIT = 10;
+  const displaySkills = allSkills.length > SKILLS_COLLAPSE_LIMIT && !skillsExpanded
+    ? allSkills.slice(0, SKILLS_COLLAPSE_LIMIT)
+    : allSkills;
+
   return (
     <div className="space-y-6">
       {/* Summary */}
@@ -264,10 +318,20 @@ function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t:
       {allSkills.length > 0 && (
         <Section title={t('resumeLibrary.detail.overview.skills', 'Skills')}>
           <div className="flex flex-wrap gap-2">
-            {allSkills.map((s, i) => (
+            {displaySkills.map((s, i) => (
               <span key={i} className="inline-block bg-indigo-50 text-indigo-700 text-xs px-3 py-1 rounded-full">{s}</span>
             ))}
           </div>
+          {allSkills.length > SKILLS_COLLAPSE_LIMIT && (
+            <button
+              onClick={() => setSkillsExpanded(!skillsExpanded)}
+              className="mt-3 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              {skillsExpanded
+                ? t('resumeLibrary.detail.overview.showLess', 'Show less')
+                : t('resumeLibrary.detail.overview.showAllSkills', { defaultValue: `Show all ${allSkills.length} skills`, count: allSkills.length })}
+            </button>
+          )}
         </Section>
       )}
 
@@ -280,14 +344,14 @@ function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t:
                 <div className="absolute -left-[7px] top-1 w-3 h-3 rounded-full bg-indigo-400" />
                 <div className="flex items-baseline justify-between">
                   <h4 className="text-sm font-semibold text-gray-900">{exp.role as string}</h4>
-                  <span className="text-xs text-gray-400 ml-2 flex-shrink-0">{exp.startDate as string} — {exp.endDate as string}</span>
+                  <span className="text-xs text-gray-500 ml-2 flex-shrink-0">{exp.startDate as string} — {exp.endDate as string}</span>
                 </div>
                 <p className="text-xs text-indigo-600 mb-1">{exp.company as string}{exp.location ? ` · ${exp.location}` : ''}</p>
-                {exp.description && <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{exp.description as string}</p>}
+                {exp.description && <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line">{exp.description as string}</p>}
                 {Array.isArray(exp.achievements) && exp.achievements.length > 0 && (
                   <ul className="mt-2 space-y-1">
                     {(exp.achievements as string[]).map((a, j) => (
-                      <li key={j} className="text-xs text-gray-600 flex items-start gap-1.5">
+                      <li key={j} className="text-xs text-gray-700 flex items-start gap-1.5">
                         <span className="text-indigo-400 mt-0.5">•</span>
                         <span>{a}</span>
                       </li>
@@ -297,7 +361,7 @@ function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t:
                 {Array.isArray(exp.technologies) && exp.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {(exp.technologies as string[]).map((tech, j) => (
-                      <span key={j} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{tech}</span>
+                      <span key={j} className="text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded">{tech}</span>
                     ))}
                   </div>
                 )}
@@ -315,10 +379,10 @@ function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t:
               <div key={i} className="flex items-start justify-between">
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900">{edu.degree as string}{edu.field ? ` in ${edu.field}` : ''}</h4>
-                  <p className="text-xs text-gray-500">{edu.institution as string}</p>
-                  {edu.gpa && <p className="text-xs text-gray-400">GPA: {edu.gpa as string}</p>}
+                  <p className="text-xs text-gray-600">{edu.institution as string}</p>
+                  {edu.gpa && <p className="text-xs text-gray-500">GPA: {edu.gpa as string}</p>}
                 </div>
-                <span className="text-xs text-gray-400">{edu.endDate as string}</span>
+                <span className="text-xs text-gray-500">{edu.endDate as string}</span>
               </div>
             ))}
           </div>
@@ -332,8 +396,8 @@ function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t:
             {certifications.map((c, i) => (
               <div key={i} className="text-sm">
                 <span className="font-medium text-gray-800">{c.name as string}</span>
-                {c.issuer && <span className="text-gray-500"> — {c.issuer as string}</span>}
-                {c.date && <span className="text-xs text-gray-400 ml-2">({c.date as string})</span>}
+                {c.issuer && <span className="text-gray-600"> — {c.issuer as string}</span>}
+                {c.date && <span className="text-xs text-gray-500 ml-2">({c.date as string})</span>}
               </div>
             ))}
           </div>
@@ -347,11 +411,11 @@ function OverviewTab({ parsed, t }: { parsed: Record<string, unknown> | null; t:
             {projects.map((p, i) => (
               <div key={i}>
                 <h4 className="text-sm font-semibold text-gray-900">{p.name as string}</h4>
-                {p.description && <p className="text-xs text-gray-600 mt-1">{p.description as string}</p>}
+                {p.description && <p className="text-xs text-gray-700 mt-1">{p.description as string}</p>}
                 {Array.isArray(p.technologies) && p.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-1">
                     {(p.technologies as string[]).map((tech, j) => (
-                      <span key={j} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{tech}</span>
+                      <span key={j} className="text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded">{tech}</span>
                     ))}
                   </div>
                 )}
@@ -372,7 +436,7 @@ function InsightsTab({ data, loading, onGenerate, t }: { data: Record<string, un
       <div className="text-center py-16">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4" />
         <p className="text-sm text-gray-500">{t('resumeLibrary.insights.generating', 'Analyzing resume...')}</p>
-        <p className="text-xs text-gray-400 mt-1">{t('resumeLibrary.insights.generatingDesc', 'This may take 10-15 seconds')}</p>
+        <p className="text-xs text-gray-500 mt-1">{t('resumeLibrary.insights.generatingDesc', 'This may take 10-15 seconds')}</p>
       </div>
     );
   }
@@ -460,7 +524,7 @@ function InsightsTab({ data, loading, onGenerate, t }: { data: Record<string, un
               <span className="text-2xl font-bold text-gray-900">{salary.rangeLow as string}</span>
               <span className="text-gray-400 mx-2">—</span>
               <span className="text-2xl font-bold text-gray-900">{salary.rangeHigh as string}</span>
-              <span className="text-xs text-gray-400 ml-2">{salary.currency as string}</span>
+              <span className="text-xs text-gray-500 ml-2">{salary.currency as string}</span>
             </div>
             <span className={`inline-block text-xs px-2 py-0.5 rounded-full mb-2 ${
               salary.confidence === 'High' ? 'bg-emerald-100 text-emerald-700' : salary.confidence === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
@@ -521,7 +585,7 @@ function InsightsTab({ data, loading, onGenerate, t }: { data: Record<string, un
               <div key={i} className="mb-3 last:mb-0">
                 <h4 className="text-sm font-semibold text-emerald-700">{s.strength}</h4>
                 <p className="text-xs text-gray-600 mt-0.5">{s.evidence}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Impact: {s.impact}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Impact: {s.impact}</p>
               </div>
             ))}
           </Section>
@@ -530,7 +594,7 @@ function InsightsTab({ data, loading, onGenerate, t }: { data: Record<string, un
               <div key={i} className="mb-3 last:mb-0">
                 <h4 className="text-sm font-semibold text-amber-700">{d.area}</h4>
                 <p className="text-xs text-gray-600 mt-0.5">Current: {d.currentLevel}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{d.recommendation}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{d.recommendation}</p>
               </div>
             ))}
           </Section>
@@ -550,7 +614,7 @@ function InsightsTab({ data, loading, onGenerate, t }: { data: Record<string, un
                   <span className="text-sm font-medium text-gray-800">{f.flag as string}</span>
                 </div>
                 <p className="text-xs text-gray-600">{f.details as string}</p>
-                {f.mitigatingFactors && <p className="text-xs text-gray-400 mt-1">Mitigating: {f.mitigatingFactors as string}</p>}
+                {f.mitigatingFactors && <p className="text-xs text-gray-500 mt-1">Mitigating: {f.mitigatingFactors as string}</p>}
               </div>
             ))}
           </div>
@@ -622,7 +686,7 @@ function JobFitTab({ data, loading, onAnalyze, t }: { data: Record<string, unkno
     return (
       <div className="text-center py-16">
         <p className="text-sm text-gray-500 mb-2">{t('resumeLibrary.jobFit.noActiveRequests', 'No active hiring requests found')}</p>
-        <p className="text-xs text-gray-400">{t('resumeLibrary.jobFit.noActiveRequestsDesc', 'Create a hiring request first to see job fit analysis')}</p>
+        <p className="text-xs text-gray-500">{t('resumeLibrary.jobFit.noActiveRequestsDesc', 'Create a hiring request first to see job fit analysis')}</p>
       </div>
     );
   }
@@ -669,8 +733,8 @@ function JobFitTab({ data, loading, onAnalyze, t }: { data: Record<string, unkno
                 <span className={`text-2xl font-bold ${(fit.fitScore as number) >= 80 ? 'text-emerald-600' : (fit.fitScore as number) >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
                   {fit.fitScore as number}
                 </span>
-                <span className="text-sm text-gray-400">/100</span>
-                {fit.fitGrade && <p className="text-xs text-gray-400">{fit.fitGrade as string}</p>}
+                <span className="text-sm text-gray-500">/100</span>
+                {fit.fitGrade && <p className="text-xs text-gray-500">{fit.fitGrade as string}</p>}
               </div>
             </div>
 
@@ -695,6 +759,59 @@ function JobFitTab({ data, loading, onAnalyze, t }: { data: Record<string, unkno
             </div>
 
             {fit.experienceAlignment && <p className="text-xs text-gray-600 mb-2">{fit.experienceAlignment as string}</p>}
+
+            {/* Experience Breakdown */}
+            {(fit.fullTimeExperience || fit.internshipExperience) && (
+              <div className="flex gap-3 mb-3">
+                {fit.fullTimeExperience && (
+                  <span className="text-[11px] bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
+                    {t('resumeLibrary.jobFit.fullTime', 'Full-time')}: {fit.fullTimeExperience as string}
+                  </span>
+                )}
+                {fit.internshipExperience && (
+                  <span className="text-[11px] bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full">
+                    {t('resumeLibrary.jobFit.internship', 'Internship')}: {fit.internshipExperience as string}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Hard Requirement Gaps */}
+            {Array.isArray(fit.hardRequirementGaps) && (fit.hardRequirementGaps as Array<Record<string, string>>).length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-medium text-red-600 mb-1.5">{t('resumeLibrary.jobFit.hardGaps', 'Hard Requirement Gaps')}</p>
+                <div className="space-y-1.5">
+                  {(fit.hardRequirementGaps as Array<Record<string, string>>).map((gap, j) => (
+                    <div key={j} className={`text-xs rounded-lg p-2 ${
+                      gap.severity === 'dealbreaker' ? 'bg-red-50 text-red-700' :
+                      gap.severity === 'significant' ? 'bg-orange-50 text-orange-700' :
+                      'bg-yellow-50 text-yellow-700'
+                    }`}>
+                      <span className="font-medium">{gap.requirement}</span>
+                      <span className="text-gray-500"> — </span>
+                      <span>{gap.candidateStatus}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Transferable Skills */}
+            {Array.isArray(fit.transferableSkills) && (fit.transferableSkills as Array<Record<string, string>>).length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-medium text-blue-600 mb-1.5">{t('resumeLibrary.jobFit.transferable', 'Transferable Skills')}</p>
+                <div className="space-y-1.5">
+                  {(fit.transferableSkills as Array<Record<string, string>>).map((ts, j) => (
+                    <div key={j} className="text-xs bg-blue-50 text-blue-700 rounded-lg p-2">
+                      <span className="font-medium">{ts.candidateHas}</span>
+                      <span className="text-gray-400 mx-1">→</span>
+                      <span>{ts.required}</span>
+                      {ts.relevance && <p className="text-blue-500 mt-0.5">{ts.relevance}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Top Reasons */}
             {Array.isArray(fit.topReasons) && (fit.topReasons as string[]).length > 0 && (

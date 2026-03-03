@@ -72,6 +72,8 @@ export function checkUsageLimit(action: BillableAction) {
           resumeMatchesUsed: true,
           topUpBalance: true,
           currentPeriodEnd: true,
+          customMaxInterviews: true,
+          customMaxMatches: true,
         },
       });
 
@@ -98,9 +100,11 @@ export function checkUsageLimit(action: BillableAction) {
       }
 
       const usedField = action === 'interview' ? 'interviewsUsed' : 'resumeMatchesUsed';
-      const limitField = action === 'interview' ? 'interviews' : 'matches';
       const used = action === 'interview' ? freshUser.interviewsUsed : freshUser.resumeMatchesUsed;
-      const limit = limits[limitField];
+      // Per-user admin override takes precedence over plan defaults
+      const limit = action === 'interview'
+        ? (freshUser.customMaxInterviews ?? limits.interviews)
+        : (freshUser.customMaxMatches ?? limits.matches);
       const price = action === 'interview' ? PAY_PER_USE.interview : PAY_PER_USE.match;
 
       if (used < limit) {

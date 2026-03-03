@@ -6,6 +6,7 @@ interface ResumeCardProps {
     name: string;
     currentRole: string | null;
     experienceYears: string | null;
+    status?: string;
     tags: string[];
     createdAt: string;
     parsedData?: Record<string, unknown> | null;
@@ -16,9 +17,22 @@ interface ResumeCardProps {
     }>;
   };
   onClick: () => void;
+  onRegenerateInsights?: () => void;
+  onReanalyzeJobFit?: () => void;
+  onReupload?: () => void;
+  insightLoading?: boolean;
+  jobFitLoading?: boolean;
 }
 
-export default function ResumeCard({ resume, onClick }: ResumeCardProps) {
+export default function ResumeCard({
+  resume,
+  onClick,
+  onRegenerateInsights,
+  onReanalyzeJobFit,
+  onReupload,
+  insightLoading = false,
+  jobFitLoading = false,
+}: ResumeCardProps) {
   const { t } = useTranslation();
 
   // Extract top skills from parsedData
@@ -60,9 +74,16 @@ export default function ResumeCard({ resume, onClick }: ResumeCardProps) {
           <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
             {resume.name}
           </h3>
-          {resume.currentRole && (
-            <p className="text-xs text-gray-500 truncate mt-0.5">{resume.currentRole}</p>
-          )}
+          <div className="flex items-center gap-2 mt-0.5">
+            {resume.currentRole && (
+              <p className="text-xs text-gray-600 truncate">{resume.currentRole}</p>
+            )}
+            {resume.status === 'archived' && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
+                {t('resumeLibrary.card.archived', 'Archived')}
+              </span>
+            )}
+          </div>
         </div>
         {topFit && topFit.fitScore != null && (
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ml-2 flex-shrink-0 ${fitColor(topFit.fitScore)}`}>
@@ -80,7 +101,7 @@ export default function ResumeCard({ resume, onClick }: ResumeCardProps) {
             </span>
           ))}
           {extraSkills > 0 && (
-            <span className="inline-block bg-gray-100 text-gray-500 text-[11px] px-2 py-0.5 rounded-full">
+            <span className="inline-block bg-gray-100 text-gray-600 text-[11px] px-2 py-0.5 rounded-full">
               +{extraSkills}
             </span>
           )}
@@ -88,7 +109,7 @@ export default function ResumeCard({ resume, onClick }: ResumeCardProps) {
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-[11px] text-gray-400">
+      <div className="flex items-center justify-between text-[11px] text-gray-500">
         <span>{new Date(resume.createdAt).toLocaleDateString()}</span>
         {topFit ? (
           <span className="truncate max-w-[120px]" title={topFit.hiringRequest.title}>
@@ -98,6 +119,50 @@ export default function ResumeCard({ resume, onClick }: ResumeCardProps) {
           <span>{resume.tags.length > 0 ? resume.tags.slice(0, 2).join(', ') : ''}</span>
         )}
       </div>
+
+      {(onRegenerateInsights || onReanalyzeJobFit || onReupload) && (
+        <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-2">
+          {onRegenerateInsights && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRegenerateInsights();
+              }}
+              disabled={insightLoading}
+              className="text-[11px] text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors disabled:opacity-60"
+            >
+              {insightLoading
+                ? t('resumeLibrary.card.regeneratingInsights', 'Regenerating...')
+                : t('resumeLibrary.card.regenerateInsights', 'Re-generate Insights')}
+            </button>
+          )}
+          {onReanalyzeJobFit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onReanalyzeJobFit();
+              }}
+              disabled={jobFitLoading}
+              className="text-[11px] text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-md transition-colors disabled:opacity-60"
+            >
+              {jobFitLoading
+                ? t('resumeLibrary.card.rematchingJobs', 'Re-matching...')
+                : t('resumeLibrary.card.rematchJobs', 'Re-match Jobs')}
+            </button>
+          )}
+          {onReupload && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onReupload();
+              }}
+              className="text-[11px] text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-md transition-colors"
+            >
+              {t('resumeLibrary.card.reupload', 'Re-upload')}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

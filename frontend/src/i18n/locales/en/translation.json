@@ -1078,7 +1078,9 @@
         "experience": "Work Experience",
         "education": "Education",
         "certifications": "Certifications",
-        "projects": "Projects"
+        "projects": "Projects",
+        "showAllSkills": "Show all {{count}} skills",
+        "showLess": "Show less"
       }
     },
     "insights": {
@@ -1106,7 +1108,11 @@
       "missingSkills": "Missing Critical",
       "recommendation": "Recommendation",
       "noActiveRequests": "No active hiring requests found",
-      "noActiveRequestsDesc": "Create a hiring request first to see job fit analysis"
+      "noActiveRequestsDesc": "Create a hiring request first to see job fit analysis",
+      "fullTime": "Full-time",
+      "internship": "Internship",
+      "hardGaps": "Hard Requirement Gaps",
+      "transferable": "Transferable Skills"
     },
     "notes": {
       "tags": "Tags",

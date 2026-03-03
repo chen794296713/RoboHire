@@ -1145,7 +1145,9 @@
         "experience": "Berufserfahrung",
         "education": "Ausbildung",
         "certifications": "Zertifikate",
-        "projects": "Projekte"
+        "projects": "Projekte",
+        "showAllSkills": "Alle {{count}} Fähigkeiten anzeigen",
+        "showLess": "Weniger anzeigen"
       }
     },
     "insights": {
@@ -1173,7 +1175,11 @@
       "missingSkills": "Fehlende kritische Fähigkeiten",
       "recommendation": "Empfehlung",
       "noActiveRequests": "Keine aktiven Stellenangebote gefunden",
-      "noActiveRequestsDesc": "Erstellen Sie zuerst ein Stellenangebot, um die Eignungsanalyse zu sehen"
+      "noActiveRequestsDesc": "Erstellen Sie zuerst ein Stellenangebot, um die Eignungsanalyse zu sehen",
+      "fullTime": "Vollzeit",
+      "internship": "Praktikum",
+      "hardGaps": "Fehlende Pflichtanforderungen",
+      "transferable": "Übertragbare Fähigkeiten"
     },
     "notes": {
       "tags": "Tags",

@@ -30,6 +30,8 @@ interface UserSummary {
   topUpBalance: number;
   currentPeriodEnd?: string | null;
   trialEnd?: string | null;
+  customMaxInterviews?: number | null;
+  customMaxMatches?: number | null;
 }
 
 interface AdjustmentRecord {
@@ -776,7 +778,9 @@ function UsersTab() {
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
   // Action form state
-  const [actionType, setActionType] = useState<'balance' | 'usage' | 'subscription' | 'reset' | 'cancel_sub' | 'disable' | 'enable' | 'set_role' | ''>('');
+  const [actionType, setActionType] = useState<'balance' | 'usage' | 'subscription' | 'set_limits' | 'reset' | 'cancel_sub' | 'disable' | 'enable' | 'set_role' | ''>('');
+  const [actionMaxInterviews, setActionMaxInterviews] = useState('');
+  const [actionMaxMatches, setActionMaxMatches] = useState('');
   const [actionAmount, setActionAmount] = useState('');
   const [actionUsageType, setActionUsageType] = useState<'interview' | 'match'>('interview');
   const [actionTier, setActionTier] = useState('starter');
@@ -849,6 +853,31 @@ function UsersTab() {
           body: JSON.stringify({ tier: actionTier, status: actionStatus, reason: actionReason.trim() }),
         });
         setActionMessage(`Subscription: ${data.data.oldTier}/${data.data.oldStatus} → ${data.data.newTier}/${data.data.newStatus}`);
+      } else if (actionType === 'set_limits') {
+        const body: Record<string, unknown> = { reason: actionReason.trim() };
+        if (actionMaxInterviews === 'clear') {
+          body.maxInterviews = null;
+        } else if (actionMaxInterviews !== '') {
+          const v = parseInt(actionMaxInterviews);
+          if (isNaN(v) || v < 0) throw new Error('Max interviews must be a non-negative integer');
+          body.maxInterviews = v;
+        }
+        if (actionMaxMatches === 'clear') {
+          body.maxMatches = null;
+        } else if (actionMaxMatches !== '') {
+          const v = parseInt(actionMaxMatches);
+          if (isNaN(v) || v < 0) throw new Error('Max matches must be a non-negative integer');
+          body.maxMatches = v;
+        }
+        if (body.maxInterviews === undefined && body.maxMatches === undefined) {
+          throw new Error('Enter at least one limit value or clear an existing override');
+        }
+        data = await adminFetch(`/users/${selectedUser.id}/set-limits`, {
+          method: 'POST',
+          body: JSON.stringify(body),
+        });
+        const fmt = (v: number | null) => v == null ? 'plan default' : String(v);
+        setActionMessage(`Limits updated: interviews ${fmt(data.data.old.maxInterviews)}→${fmt(data.data.new.maxInterviews)}, matches ${fmt(data.data.old.maxMatches)}→${fmt(data.data.new.maxMatches)}`);
       } else if (actionType === 'reset') {
         data = await adminFetch(`/users/${selectedUser.id}/reset-usage`, {
           method: 'POST',
@@ -883,6 +912,8 @@ function UsersTab() {
 
       await loadUserDetail(selectedUser.id);
       setActionAmount('');
+      setActionMaxInterviews('');
+      setActionMaxMatches('');
       setActionReason('');
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Action failed');
@@ -956,10 +987,16 @@ function UsersTab() {
                       <td className="py-2.5">{statusBadge(u.subscriptionStatus)}</td>
                       <td className="py-2.5 text-gray-900 font-mono">${u.topUpBalance.toFixed(2)}</td>
                       <td className="py-2.5 text-gray-600">
-                        {u.interviewsUsed}/{limits.interviews === Infinity ? '∞' : limits.interviews}
+                        {u.interviewsUsed}/
+                        {u.customMaxInterviews != null
+                          ? <span className="text-amber-600 font-medium" title="Custom override">{u.customMaxInterviews}</span>
+                          : limits.interviews === Infinity ? '∞' : limits.interviews}
                       </td>
                       <td className="py-2.5 text-gray-600">
-                        {u.resumeMatchesUsed}/{limits.matches === Infinity ? '∞' : limits.matches}
+                        {u.resumeMatchesUsed}/
+                        {u.customMaxMatches != null
+                          ? <span className="text-amber-600 font-medium" title="Custom override">{u.customMaxMatches}</span>
+                          : limits.matches === Infinity ? '∞' : limits.matches}
                       </td>
                       <td className="py-2.5">
                         <button className="text-indigo-600 hover:text-indigo-800 text-xs font-medium">View</button>
@@ -1027,9 +1064,11 @@ function UsersTab() {
                   <p className="text-lg font-semibold text-gray-900">
                     {selectedUser.interviewsUsed}
                     <span className="text-sm text-gray-400 font-normal">
-                      /{(PLAN_LIMITS[selectedUser.subscriptionTier] || PLAN_LIMITS.free).interviews === Infinity
-                        ? '∞'
-                        : (PLAN_LIMITS[selectedUser.subscriptionTier] || PLAN_LIMITS.free).interviews}
+                      /{selectedUser.customMaxInterviews != null
+                        ? <span className="text-amber-600" title="Custom override">{selectedUser.customMaxInterviews}</span>
+                        : (PLAN_LIMITS[selectedUser.subscriptionTier] || PLAN_LIMITS.free).interviews === Infinity
+                          ? '∞'
+                          : (PLAN_LIMITS[selectedUser.subscriptionTier] || PLAN_LIMITS.free).interviews}
                     </span>
                   </p>
                 </div>
@@ -1038,9 +1077,11 @@ function UsersTab() {
                   <p className="text-lg font-semibold text-gray-900">
                     {selectedUser.resumeMatchesUsed}
                     <span className="text-sm text-gray-400 font-normal">
-                      /{(PLAN_LIMITS[selectedUser.subscriptionTier] || PLAN_LIMITS.free).matches === Infinity
-                        ? '∞'
-                        : (PLAN_LIMITS[selectedUser.subscriptionTier] || PLAN_LIMITS.free).matches}
+                      /{selectedUser.customMaxMatches != null
+                        ? <span className="text-amber-600" title="Custom override">{selectedUser.customMaxMatches}</span>
+                        : (PLAN_LIMITS[selectedUser.subscriptionTier] || PLAN_LIMITS.free).matches === Infinity
+                          ? '∞'
+                          : (PLAN_LIMITS[selectedUser.subscriptionTier] || PLAN_LIMITS.free).matches}
                     </span>
                   </p>
                 </div>
@@ -1060,6 +1101,7 @@ function UsersTab() {
                     { key: 'balance', label: 'Adjust Balance' },
                     { key: 'usage', label: 'Adjust Usage' },
                     { key: 'subscription', label: 'Set Subscription' },
+                    { key: 'set_limits', label: 'Set Limits' },
                     { key: 'reset', label: 'Reset Usage' },
                     { key: 'cancel_sub', label: 'Cancel Subscription' },
                     { key: 'disable', label: 'Disable User' },
@@ -1155,6 +1197,72 @@ function UsersTab() {
                             <option value="past_due">Past Due</option>
                             <option value="canceled">Canceled</option>
                           </select>
+                        </div>
+                      </div>
+                    )}
+
+                    {actionType === 'set_limits' && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Override the maximum number of API calls for this user. Leave blank to keep current value. Enter 0 to block access. Clear to revert to plan default.
+                        </p>
+                        <div className="flex gap-3">
+                          <div className="flex-1">
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Max Interviews
+                              {selectedUser?.customMaxInterviews != null && (
+                                <span className="ml-1 text-amber-600">(current: {selectedUser.customMaxInterviews})</span>
+                              )}
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={actionMaxInterviews}
+                                onChange={(e) => setActionMaxInterviews(e.target.value)}
+                                placeholder={`Plan default: ${(PLAN_LIMITS[selectedUser?.subscriptionTier || 'free'] || PLAN_LIMITS.free).interviews === Infinity ? '∞' : (PLAN_LIMITS[selectedUser?.subscriptionTier || 'free'] || PLAN_LIMITS.free).interviews}`}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                              />
+                              {selectedUser?.customMaxInterviews != null && (
+                                <button
+                                  type="button"
+                                  onClick={() => setActionMaxInterviews('clear')}
+                                  className={`px-2 py-1 text-xs rounded border ${actionMaxInterviews === 'clear' ? 'bg-amber-50 border-amber-300 text-amber-700' : 'border-gray-300 text-gray-500 hover:bg-gray-50'}`}
+                                >
+                                  Clear
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Max Matches
+                              {selectedUser?.customMaxMatches != null && (
+                                <span className="ml-1 text-amber-600">(current: {selectedUser.customMaxMatches})</span>
+                              )}
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={actionMaxMatches}
+                                onChange={(e) => setActionMaxMatches(e.target.value)}
+                                placeholder={`Plan default: ${(PLAN_LIMITS[selectedUser?.subscriptionTier || 'free'] || PLAN_LIMITS.free).matches === Infinity ? '∞' : (PLAN_LIMITS[selectedUser?.subscriptionTier || 'free'] || PLAN_LIMITS.free).matches}`}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                              />
+                              {selectedUser?.customMaxMatches != null && (
+                                <button
+                                  type="button"
+                                  onClick={() => setActionMaxMatches('clear')}
+                                  className={`px-2 py-1 text-xs rounded border ${actionMaxMatches === 'clear' ? 'bg-amber-50 border-amber-300 text-amber-700' : 'border-gray-300 text-gray-500 hover:bg-gray-50'}`}
+                                >
+                                  Clear
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}

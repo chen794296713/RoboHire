@@ -33,6 +33,8 @@ model User {
   interviewsUsed      Int       @default(0)
   resumeMatchesUsed   Int       @default(0)
   topUpBalance        Float     @default(0)
+  customMaxInterviews Int?      // Admin override for max interviews (null = use plan default)
+  customMaxMatches    Int?      // Admin override for max matches (null = use plan default)
   
   hiringRequests  HiringRequest[]
   sessions        Session[]

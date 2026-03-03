@@ -1145,7 +1145,9 @@
         "experience": "Experiência Profissional",
         "education": "Formação",
         "certifications": "Certificações",
-        "projects": "Projetos"
+        "projects": "Projetos",
+        "showAllSkills": "Mostrar todas as {{count}} habilidades",
+        "showLess": "Mostrar menos"
       }
     },
     "insights": {
@@ -1173,7 +1175,11 @@
       "missingSkills": "Habilidades Críticas Ausentes",
       "recommendation": "Recomendação",
       "noActiveRequests": "Nenhuma vaga ativa encontrada",
-      "noActiveRequestsDesc": "Crie uma vaga primeiro para ver a análise de adequação"
+      "noActiveRequestsDesc": "Crie uma vaga primeiro para ver a análise de adequação",
+      "fullTime": "Tempo integral",
+      "internship": "Estágio",
+      "hardGaps": "Requisitos obrigatórios ausentes",
+      "transferable": "Competências transferíveis"
     },
     "notes": {
       "tags": "Tags",

@@ -1200,7 +1200,9 @@
         "experience": "工作经历",
         "education": "教育背景",
         "certifications": "证书",
-        "projects": "项目经历"
+        "projects": "项目经历",
+        "showAllSkills": "显示全部 {{count}} 项技能",
+        "showLess": "收起"
       }
     },
     "insights": {
@@ -1228,7 +1230,11 @@
       "missingSkills": "缺失关键技能",
       "recommendation": "推荐建议",
       "noActiveRequests": "未找到有效招聘需求",
-      "noActiveRequestsDesc": "请先创建招聘需求以查看岗位匹配分析"
+      "noActiveRequestsDesc": "请先创建招聘需求以查看岗位匹配分析",
+      "fullTime": "全职",
+      "internship": "实习",
+      "hardGaps": "硬性要求缺口",
+      "transferable": "可迁移技能"
     },
     "notes": {
       "tags": "标签",

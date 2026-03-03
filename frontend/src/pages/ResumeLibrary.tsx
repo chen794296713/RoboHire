@@ -33,6 +33,8 @@ interface Stats {
   analyzed: number;
 }
 
+type StatusFilter = 'active' | 'archived' | 'all';
+
 export default function ResumeLibrary() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -40,18 +42,24 @@ export default function ResumeLibrary() {
   const [resumes, setResumes] = useState<ResumeListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('active');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [batchMode, setBatchMode] = useState(false);
+  const [replaceResumeId, setReplaceResumeId] = useState<string | undefined>(undefined);
+  const [actionFeedback, setActionFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [insightLoadingMap, setInsightLoadingMap] = useState<Record<string, boolean>>({});
+  const [jobFitLoadingMap, setJobFitLoadingMap] = useState<Record<string, boolean>>({});
   const [stats, setStats] = useState<Stats | null>(null);
 
-  const fetchResumes = useCallback(async (p: number, q?: string) => {
+  const fetchResumes = useCallback(async (p: number, q?: string, status: StatusFilter = 'active') => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: String(p), limit: '20' });
       if (q) params.set('search', q);
+      params.set('status', status);
       const res = await axios.get(`/api/v1/resumes?${params}`);
       if (res.data.success) {
         setResumes(res.data.data);
@@ -75,8 +83,8 @@ export default function ResumeLibrary() {
   }, []);
 
   useEffect(() => {
-    fetchResumes(page, search);
-  }, [page, fetchResumes]);
+    fetchResumes(page, search, statusFilter);
+  }, [page, statusFilter, fetchResumes]);
 
   useEffect(() => {
     fetchStats();
@@ -84,7 +92,7 @@ export default function ResumeLibrary() {
 
   const handleSearch = () => {
     setPage(1);
-    fetchResumes(1, search);
+    fetchResumes(1, search, statusFilter);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -92,14 +100,67 @@ export default function ResumeLibrary() {
   };
 
   const handleUploadComplete = () => {
-    fetchResumes(1, search);
+    fetchResumes(1, search, statusFilter);
     fetchStats();
+    setPage(1);
+    if (replaceResumeId) {
+      setUploadOpen(false);
+      setReplaceResumeId(undefined);
+      showFeedback('success', t('resumeLibrary.actions.reuploadReactivated', 'Resume updated and reactivated'));
+    }
+  };
+
+  const handleStatusFilterChange = (next: StatusFilter) => {
+    if (next === statusFilter) return;
+    setStatusFilter(next);
     setPage(1);
   };
 
   const openUpload = (batch: boolean) => {
+    setReplaceResumeId(undefined);
     setBatchMode(batch);
     setUploadOpen(true);
+  };
+
+  const openReplaceUpload = (resumeId: string) => {
+    setReplaceResumeId(resumeId);
+    setBatchMode(false);
+    setUploadOpen(true);
+  };
+
+  const showFeedback = (type: 'success' | 'error', text: string) => {
+    setActionFeedback({ type, text });
+    window.setTimeout(() => {
+      setActionFeedback(prev => (prev?.text === text ? null : prev));
+    }, 3000);
+  };
+
+  const regenerateInsights = async (resumeId: string) => {
+    setInsightLoadingMap(prev => ({ ...prev, [resumeId]: true }));
+    try {
+      await axios.post(`/api/v1/resumes/${resumeId}/insights?force=true`);
+      showFeedback('success', t('resumeLibrary.actions.regenerateInsightsSuccess', 'AI insights regenerated'));
+      fetchStats();
+    } catch (err) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.error || err.message : 'Failed to regenerate insights';
+      showFeedback('error', msg);
+    } finally {
+      setInsightLoadingMap(prev => ({ ...prev, [resumeId]: false }));
+    }
+  };
+
+  const reanalyzeJobFit = async (resumeId: string) => {
+    setJobFitLoadingMap(prev => ({ ...prev, [resumeId]: true }));
+    try {
+      await axios.post(`/api/v1/resumes/${resumeId}/job-fit`);
+      showFeedback('success', t('resumeLibrary.actions.reanalyzeJobFitSuccess', 'Job fit updated'));
+      fetchResumes(page, search, statusFilter);
+    } catch (err) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.error || err.message : 'Failed to re-analyze job fit';
+      showFeedback('error', msg);
+    } finally {
+      setJobFitLoadingMap(prev => ({ ...prev, [resumeId]: false }));
+    }
   };
 
   return (
@@ -172,6 +233,41 @@ export default function ResumeLibrary() {
         </button>
       </div>
 
+      <div className="flex items-center gap-2 mb-4">
+        <button
+          onClick={() => handleStatusFilterChange('active')}
+          className={`px-3 py-1.5 text-xs rounded-md transition-colors ${
+            statusFilter === 'active' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          {t('resumeLibrary.filters.active', 'Active')}
+        </button>
+        <button
+          onClick={() => handleStatusFilterChange('archived')}
+          className={`px-3 py-1.5 text-xs rounded-md transition-colors ${
+            statusFilter === 'archived' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          {t('resumeLibrary.filters.archived', 'Archived')}
+        </button>
+        <button
+          onClick={() => handleStatusFilterChange('all')}
+          className={`px-3 py-1.5 text-xs rounded-md transition-colors ${
+            statusFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+          }`}
+        >
+          {t('resumeLibrary.filters.all', 'All')}
+        </button>
+      </div>
+
+      {actionFeedback && (
+        <div className={`mb-4 rounded-lg px-3 py-2 text-sm ${
+          actionFeedback.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+        }`}>
+          {actionFeedback.text}
+        </div>
+      )}
+
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center py-24">
@@ -182,14 +278,23 @@ export default function ResumeLibrary() {
           <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-700 mb-2">{t('resumeLibrary.empty.title', 'No resumes yet')}</h3>
-          <p className="text-sm text-gray-500 mb-6">{t('resumeLibrary.empty.description', 'Upload resumes to build your candidate library')}</p>
-          <button
-            onClick={() => openUpload(false)}
-            className="px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            {t('resumeLibrary.empty.cta', 'Upload Your First Resume')}
-          </button>
+          {statusFilter === 'archived' ? (
+            <>
+              <h3 className="text-lg font-medium text-gray-700 mb-2">{t('resumeLibrary.empty.archivedTitle', 'No archived resumes')}</h3>
+              <p className="text-sm text-gray-500 mb-6">{t('resumeLibrary.empty.archivedDescription', 'Archived resumes will appear here')}</p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-medium text-gray-700 mb-2">{t('resumeLibrary.empty.title', 'No resumes yet')}</h3>
+              <p className="text-sm text-gray-500 mb-6">{t('resumeLibrary.empty.description', 'Upload resumes to build your candidate library')}</p>
+              <button
+                onClick={() => openUpload(false)}
+                className="px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                {t('resumeLibrary.empty.cta', 'Upload Your First Resume')}
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <>
@@ -202,6 +307,11 @@ export default function ResumeLibrary() {
                 key={r.id}
                 resume={r}
                 onClick={() => navigate(`/dashboard/resumes/${r.id}`)}
+                onRegenerateInsights={r.status === 'active' ? () => regenerateInsights(r.id) : undefined}
+                onReanalyzeJobFit={r.status === 'active' ? () => reanalyzeJobFit(r.id) : undefined}
+                onReupload={() => openReplaceUpload(r.id)}
+                insightLoading={Boolean(insightLoadingMap[r.id])}
+                jobFitLoading={Boolean(jobFitLoadingMap[r.id])}
               />
             ))}
           </div>
@@ -234,9 +344,13 @@ export default function ResumeLibrary() {
       {/* Upload Modal */}
       <ResumeUploadModal
         open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
+        onClose={() => {
+          setUploadOpen(false);
+          setReplaceResumeId(undefined);
+        }}
         onUploaded={handleUploadComplete}
         batch={batchMode}
+        replaceResumeId={replaceResumeId}
       />
     </div>
   );

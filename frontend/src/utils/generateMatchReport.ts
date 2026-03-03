@@ -181,6 +181,25 @@ export function generateMatchReport(data: MatchResultData): string {
     mustHaveSection = section('Must-Have Analysis', content);
   }
 
+  // Hard Requirement Gaps
+  let hardReqGapsSection = '';
+  if (d.hardRequirementGaps && d.hardRequirementGaps.length > 0) {
+    let content = '';
+    for (const gap of d.hardRequirementGaps) {
+      const borderColor = gap.severity === 'dealbreaker' ? '#ef4444' : gap.severity === 'critical' ? '#f97316' : '#eab308';
+      const bgColor = gap.severity === 'dealbreaker' ? '#fef2f2' : gap.severity === 'critical' ? '#fff7ed' : '#fefce8';
+      content += `<div style="background:${bgColor};border-left:4px solid ${borderColor};border-radius:8px;padding:12px;margin-bottom:8px">`;
+      content += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">`;
+      content += `<strong style="font-size:13px;color:#111827">${escapeHtml(gap.requirement)}</strong>`;
+      content += `<span style="font-size:11px;font-weight:600;color:${borderColor};text-transform:uppercase">${escapeHtml(gap.severity)}</span>`;
+      content += `</div>`;
+      content += `<div style="font-size:13px;color:#374151;margin-bottom:2px">Candidate: ${escapeHtml(gap.candidateStatus)}</div>`;
+      content += `<div style="font-size:12px;color:#6b7280">${escapeHtml(gap.impact)}</div>`;
+      content += `</div>`;
+    }
+    hardReqGapsSection = section('Hard Requirement Gaps', content);
+  }
+
   // Nice-to-Have Analysis
   let niceToHaveSection = '';
   if (d.niceToHaveAnalysis) {
@@ -228,10 +247,38 @@ export function generateMatchReport(data: MatchResultData): string {
     skillMatchSection = section('Skill Match', content);
   }
 
+  // Transferable Skills
+  let transferableSection = '';
+  if (d.transferableSkills && d.transferableSkills.length > 0) {
+    let content = `<p style="font-size:13px;color:#6b7280;margin-bottom:12px">Adjacent skills that transfer to the required competencies</p>`;
+    for (const ts of d.transferableSkills) {
+      content += `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:8px">`;
+      content += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">`;
+      content += `<span style="font-size:13px"><strong style="color:#1d4ed8">${escapeHtml(ts.candidateHas)}</strong> <span style="color:#9ca3af">→</span> <strong style="color:#374151">${escapeHtml(ts.required)}</strong></span>`;
+      content += `<span style="font-size:12px;font-weight:600;color:#1d4ed8">${ts.valueFactor}% value</span>`;
+      content += `</div>`;
+      content += `<div style="font-size:12px;color:#1d4ed8">${escapeHtml(ts.relevance)}</div>`;
+      content += `</div>`;
+    }
+    transferableSection = section('Transferable Skills', content);
+  }
+
   // Experience
   let experienceSection = '';
   if (d.experienceMatch || d.experienceValidation) {
     let content = '';
+    if (d.experienceBreakdown) {
+      content += `<div style="display:grid;grid-template-columns:1fr 1fr${d.experienceBreakdown.contractExperience ? ' 1fr' : ''};gap:12px;margin-bottom:16px">`;
+      content += `<div style="text-align:center;padding:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px"><div style="font-size:11px;color:#2563eb">Full-Time</div><div style="font-size:18px;font-weight:700;color:#1e40af">${escapeHtml(d.experienceBreakdown.fullTimeExperience)}</div></div>`;
+      content += `<div style="text-align:center;padding:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px"><div style="font-size:11px;color:#d97706">Internship</div><div style="font-size:18px;font-weight:700;color:#92400e">${escapeHtml(d.experienceBreakdown.internshipExperience)}</div></div>`;
+      if (d.experienceBreakdown.contractExperience) {
+        content += `<div style="text-align:center;padding:10px;background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px"><div style="font-size:11px;color:#7c3aed">Contract</div><div style="font-size:18px;font-weight:700;color:#5b21b6">${escapeHtml(d.experienceBreakdown.contractExperience)}</div></div>`;
+      }
+      content += `</div>`;
+      if (d.experienceBreakdown.note) {
+        content += `<div style="font-size:13px;color:#374151;background:#f9fafb;border-radius:8px;padding:10px;margin-bottom:12px">${escapeHtml(d.experienceBreakdown.note)}</div>`;
+      }
+    }
     if (d.experienceValidation) {
       content += renderScoreBar('Experience Score', d.experienceValidation.score, '100');
       content += `<div style="font-size:13px;color:#374151;margin-bottom:12px"><strong>Relevance:</strong> ${escapeHtml(d.experienceValidation.relevanceToRole)}</div>`;
@@ -366,8 +413,10 @@ export function generateMatchReport(data: MatchResultData): string {
   ${scoreBreakdown}
   ${resumeAnalysis}
   ${mustHaveSection}
+  ${hardReqGapsSection}
   ${niceToHaveSection}
   ${skillMatchSection}
+  ${transferableSection}
   ${experienceSection}
   ${potentialSection}
   ${recsSection}

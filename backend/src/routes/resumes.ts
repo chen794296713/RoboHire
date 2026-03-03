@@ -9,7 +9,7 @@ import { resumeInsightAgent } from '../agents/ResumeInsightAgent.js';
 import { jobFitAgent } from '../agents/JobFitAgent.js';
 import prisma from '../lib/prisma.js';
 import { Prisma } from '@prisma/client';
-import type { ParsedResume } from '../types/index.js';
+import type { ParsedResume, WorkExperience } from '../types/index.js';
 
 const router = Router();
 
@@ -30,11 +30,93 @@ function computeHash(text: string): string {
   return crypto.createHash('sha256').update(normalized).digest('hex').substring(0, 16);
 }
 
+function decodeFilename(raw: string): string {
+  try {
+    // Multer decodes Content-Disposition filenames as Latin-1 by default.
+    // Re-encode to Latin-1 bytes then decode as UTF-8 to recover CJK characters.
+    const bytes = Buffer.from(raw, 'latin1');
+    const decoded = bytes.toString('utf-8');
+    // If decoding produced replacement chars, the original was already correct
+    if (decoded.includes('\uFFFD')) return raw;
+    return decoded;
+  } catch {
+    return raw;
+  }
+}
+
 async function extractText(buffer: Buffer, mimetype: string, filename: string): Promise<string> {
   if (mimetype === 'application/pdf') {
     return pdfService.extractText(buffer);
   }
   return documentParsingService.extractText(buffer, mimetype, filename);
+}
+
+function parseDate(dateStr: string | undefined): Date | null {
+  if (!dateStr) return null;
+  const s = dateStr.trim().toLowerCase();
+  if (s === 'present' || s === '至今' || s === '现在' || s === '現在' || s === 'current' || s === 'now') {
+    return new Date();
+  }
+  // Try ISO: 2020-01, 2020-01-15
+  const isoMatch = s.match(/^(\d{4})[-/](\d{1,2})/);
+  if (isoMatch) return new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1);
+  // Try "Month Year": Jan 2020, January 2020, 01/2020
+  const monthYear = s.match(/^([a-z]+)\s*(\d{4})$/);
+  if (monthYear) {
+    const d = new Date(`${monthYear[1]} 1, ${monthYear[2]}`);
+    if (!isNaN(d.getTime())) return d;
+  }
+  const slashMonthYear = s.match(/^(\d{1,2})\/(\d{4})$/);
+  if (slashMonthYear) return new Date(parseInt(slashMonthYear[2]), parseInt(slashMonthYear[1]) - 1);
+  // Try just year: 2020
+  const yearOnly = s.match(/^(\d{4})$/);
+  if (yearOnly) return new Date(parseInt(yearOnly[1]), 0);
+  // Fallback: try native parsing
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function estimateMonths(startDate?: string, endDate?: string, duration?: string): number {
+  const start = parseDate(startDate);
+  const end = parseDate(endDate);
+  if (start && end) {
+    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    return Math.max(1, months);
+  }
+  // Try to parse duration string like "2 years 3 months", "1.5 years", "6 months"
+  if (duration) {
+    const d = duration.toLowerCase();
+    let total = 0;
+    const yearMatch = d.match(/(\d+(?:\.\d+)?)\s*(?:year|yr|年)/);
+    if (yearMatch) total += parseFloat(yearMatch[1]) * 12;
+    const monthMatch = d.match(/(\d+)\s*(?:month|mo|个月|ヶ月)/);
+    if (monthMatch) total += parseInt(monthMatch[1]);
+    if (total > 0) return Math.round(total);
+  }
+  return 6; // Default estimate if no dates
+}
+
+function computeExperienceYears(experience: WorkExperience[]): string {
+  let fullTimeMonths = 0;
+  let internMonths = 0;
+  for (const exp of experience) {
+    const months = estimateMonths(exp.startDate, exp.endDate, exp.duration);
+    if (exp.employmentType === 'internship') {
+      internMonths += months;
+    } else {
+      fullTimeMonths += months;
+    }
+  }
+  const ftYears = Math.round(fullTimeMonths / 12 * 10) / 10;
+  const intMonths = Math.round(internMonths);
+  const parts: string[] = [];
+  if (ftYears > 0) parts.push(`${ftYears} years`);
+  if (intMonths > 0) {
+    parts.push(intMonths >= 12
+      ? `${Math.round(intMonths / 12 * 10) / 10} years internship`
+      : `${intMonths} months internship`);
+  }
+  return parts.join(' + ') || '0 years';
 }
 
 // ─── Upload single resume ──────────────────────────────────────────────
@@ -49,9 +131,10 @@ router.post('/upload', requireAuth, uploadDoc.single('file'), async (req: Reques
 
     const userId = req.user.id;
     const { buffer, mimetype, originalname, size } = req.file;
+    const decodedName = decodeFilename(originalname);
 
     // Extract text
-    const resumeText = await extractText(buffer, mimetype, originalname);
+    const resumeText = await extractText(buffer, mimetype, decodedName);
     if (!resumeText || resumeText.trim().length < 20) {
       return res.status(400).json({ success: false, error: 'Could not extract meaningful text from the file' });
     }
@@ -69,12 +152,12 @@ router.post('/upload', requireAuth, uploadDoc.single('file'), async (req: Reques
     const parsed = await resumeParseAgent.parse(resumeText, req.requestId);
 
     // Extract metadata from parsed data
-    const name = parsed.name || originalname.replace(/\.[^.]+$/, '');
+    const name = parsed.name || decodedName.replace(/\.[^.]+$/, '');
     const email = parsed.email || null;
     const phone = parsed.phone || null;
     const currentRole = parsed.experience?.[0]?.role as string || null;
-    const experienceYears = parsed.experience
-      ? `${parsed.experience.length} positions`
+    const experienceYears = parsed.experience && parsed.experience.length > 0
+      ? computeExperienceYears(parsed.experience)
       : null;
 
     const resume = await prisma.resume.create({
@@ -87,7 +170,7 @@ router.post('/upload', requireAuth, uploadDoc.single('file'), async (req: Reques
         experienceYears,
         resumeText,
         parsedData: JSON.parse(JSON.stringify(parsed)),
-        fileName: originalname,
+        fileName: decodedName,
         fileSize: size,
         fileType: mimetype,
         contentHash,
@@ -120,10 +203,11 @@ router.post('/upload-batch', requireAuth, uploadDoc.array('files', 10), async (r
     const results: Array<{ fileName: string; success: boolean; data?: unknown; error?: string; duplicate?: boolean }> = [];
 
     for (const file of files) {
+      const decodedName = decodeFilename(file.originalname);
       try {
-        const resumeText = await extractText(file.buffer, file.mimetype, file.originalname);
+        const resumeText = await extractText(file.buffer, file.mimetype, decodedName);
         if (!resumeText || resumeText.trim().length < 20) {
-          results.push({ fileName: file.originalname, success: false, error: 'Could not extract text' });
+          results.push({ fileName: decodedName, success: false, error: 'Could not extract text' });
           continue;
         }
 
@@ -132,12 +216,12 @@ router.post('/upload-batch', requireAuth, uploadDoc.array('files', 10), async (r
           where: { userId_contentHash: { userId, contentHash } },
         });
         if (existing) {
-          results.push({ fileName: file.originalname, success: true, data: existing, duplicate: true });
+          results.push({ fileName: decodedName, success: true, data: existing, duplicate: true });
           continue;
         }
 
         const parsed = await resumeParseAgent.parse(resumeText, req.requestId);
-        const name = parsed.name || file.originalname.replace(/\.[^.]+$/, '');
+        const name = parsed.name || decodedName.replace(/\.[^.]+$/, '');
 
         const resume = await prisma.resume.create({
           data: {
@@ -146,10 +230,10 @@ router.post('/upload-batch', requireAuth, uploadDoc.array('files', 10), async (r
             email: parsed.email || null,
             phone: parsed.phone || null,
             currentRole: parsed.experience?.[0]?.role as string || null,
-            experienceYears: parsed.experience ? `${parsed.experience.length} positions` : null,
+            experienceYears: parsed.experience?.length ? computeExperienceYears(parsed.experience) : null,
             resumeText,
             parsedData: JSON.parse(JSON.stringify(parsed)),
-            fileName: file.originalname,
+            fileName: decodedName,
             fileSize: file.size,
             fileType: file.mimetype,
             contentHash,
@@ -157,10 +241,10 @@ router.post('/upload-batch', requireAuth, uploadDoc.array('files', 10), async (r
           },
         });
 
-        results.push({ fileName: file.originalname, success: true, data: resume });
+        results.push({ fileName: decodedName, success: true, data: resume });
       } catch (err) {
         results.push({
-          fileName: file.originalname,
+          fileName: decodedName,
           success: false,
           error: err instanceof Error ? err.message : 'Processing failed',
         });
@@ -173,6 +257,99 @@ router.post('/upload-batch', requireAuth, uploadDoc.array('files', 10), async (r
     return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to process batch upload',
+    });
+  }
+});
+
+// ─── Re-upload and overwrite existing resume ─────────────────────────────
+router.post('/:id/reupload', requireAuth, uploadDoc.single('file'), async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
+    const userId = req.user.id;
+    const resumeId = req.params.id;
+    const existingResume = await prisma.resume.findFirst({
+      where: { id: resumeId, userId },
+      select: { id: true, source: true, status: true },
+    });
+
+    if (!existingResume) {
+      return res.status(404).json({ success: false, error: 'Resume not found' });
+    }
+
+    const { buffer, mimetype, originalname, size } = req.file;
+    const decodedName = decodeFilename(originalname);
+
+    const resumeText = await extractText(buffer, mimetype, decodedName);
+    if (!resumeText || resumeText.trim().length < 20) {
+      return res.status(400).json({ success: false, error: 'Could not extract meaningful text from the file' });
+    }
+
+    const contentHash = computeHash(resumeText);
+    const duplicate = await prisma.resume.findFirst({
+      where: {
+        userId,
+        contentHash,
+        NOT: { id: resumeId },
+      },
+      select: { id: true, name: true },
+    });
+
+    if (duplicate) {
+      return res.status(409).json({
+        success: false,
+        error: 'Another resume with identical content already exists',
+        duplicateResumeId: duplicate.id,
+      });
+    }
+
+    const parsed = await resumeParseAgent.parse(resumeText, req.requestId);
+    const name = parsed.name || decodedName.replace(/\.[^.]+$/, '');
+    const email = parsed.email || null;
+    const phone = parsed.phone || null;
+    const currentRole = parsed.experience?.[0]?.role as string || null;
+    const experienceYears = parsed.experience && parsed.experience.length > 0
+      ? computeExperienceYears(parsed.experience)
+      : null;
+
+    const updated = await prisma.$transaction(async (tx) => {
+      await tx.resumeJobFit.deleteMany({
+        where: { resumeId },
+      });
+
+      return tx.resume.update({
+        where: { id: resumeId },
+        data: {
+          name,
+          email,
+          phone,
+          currentRole,
+          experienceYears,
+          resumeText,
+          parsedData: JSON.parse(JSON.stringify(parsed)),
+          insightData: Prisma.DbNull,
+          jobFitData: Prisma.DbNull,
+          fileName: decodedName,
+          fileSize: size,
+          fileType: mimetype,
+          contentHash,
+          source: existingResume.source || 'upload',
+          status: 'active',
+        },
+      });
+    });
+
+    return res.json({ success: true, data: updated });
+  } catch (error) {
+    console.error('Resume re-upload error:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to overwrite resume',
     });
   }
 });
@@ -391,10 +568,13 @@ router.post('/:id/insights', requireAuth, async (req: Request, res: Response) =>
       return res.status(404).json({ success: false, error: 'Resume not found' });
     }
 
+    const force = String(req.query.force || '').toLowerCase();
+    const forceRegenerate = force === 'true' || force === '1';
+
     // Check cache (7 day TTL)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    if (resume.insightData && resume.updatedAt > sevenDaysAgo) {
+    if (!forceRegenerate && resume.insightData && resume.updatedAt > sevenDaysAgo) {
       return res.json({ success: true, data: resume.insightData, cached: true });
     }
 

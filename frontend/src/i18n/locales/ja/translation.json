@@ -1148,7 +1148,9 @@
         "experience": "職歴",
         "education": "学歴",
         "certifications": "資格",
-        "projects": "プロジェクト"
+        "projects": "プロジェクト",
+        "showAllSkills": "全{{count}}件のスキルを表示",
+        "showLess": "閉じる"
       }
     },
     "insights": {
@@ -1176,7 +1178,11 @@
       "missingSkills": "不足する重要スキル",
       "recommendation": "推薦",
       "noActiveRequests": "有効な求人案件がありません",
-      "noActiveRequestsDesc": "職種適性分析を表示するには、まず求人案件を作成してください"
+      "noActiveRequestsDesc": "職種適性分析を表示するには、まず求人案件を作成してください",
+      "fullTime": "正社員",
+      "internship": "インターン",
+      "hardGaps": "必須要件の不足",
+      "transferable": "応用可能なスキル"
     },
     "notes": {
       "tags": "タグ",

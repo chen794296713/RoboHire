@@ -5,6 +5,7 @@ export class GoogleProvider implements LLMProvider {
   private genAI: GoogleGenerativeAI;
   private defaultModel: string;
   private readonly retryDelayMs = 800;
+  private readonly requestTimeoutMs: number;
 
   constructor(apiKey: string, defaultModel: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
@@ -12,6 +13,7 @@ export class GoogleProvider implements LLMProvider {
     this.defaultModel = defaultModel.includes('/') 
       ? defaultModel.split('/')[1] 
       : defaultModel;
+    this.requestTimeoutMs = Number(process.env.GOOGLE_LLM_TIMEOUT_MS || process.env.LLM_TIMEOUT_MS || 45000);
   }
 
   getProviderName(): string {
@@ -79,7 +81,14 @@ export class GoogleProvider implements LLMProvider {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
-        return await model.generateContent(prompt);
+        return await Promise.race([
+          model.generateContent(prompt),
+          new Promise<never>((_resolve, reject) => {
+            setTimeout(() => {
+              reject(new Error(`Google model request timed out after ${this.requestTimeoutMs}ms`));
+            }, this.requestTimeoutMs);
+          }),
+        ]);
       } catch (error) {
         const isLastAttempt = attempt === maxAttempts;
         if (isLastAttempt || !this.shouldRetryHighDemandError(error)) {
@@ -124,7 +133,10 @@ export class GoogleProvider implements LLMProvider {
       normalized.includes('503 service unavailable') ||
       (normalized.includes('service unavailable') && normalized.includes('high demand')) ||
       normalized.includes('currently experiencing high demand') ||
-      normalized.includes('spikes in demand are usually temporary')
+      normalized.includes('spikes in demand are usually temporary') ||
+      normalized.includes('fetch failed') ||
+      normalized.includes('timed out') ||
+      normalized.includes('timeout')
     );
   }
 
