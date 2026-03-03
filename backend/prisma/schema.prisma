@@ -50,6 +50,7 @@ model User {
 
   @@index([email])
   @@index([provider, providerId])
+  @@index([createdAt])
 }
 
 model Session {
@@ -63,6 +64,7 @@ model Session {
 
   @@index([token])
   @@index([userId])
+  @@index([expiresAt])
 }
 
 model HiringRequest {
@@ -84,6 +86,8 @@ model HiringRequest {
 
   @@index([userId])
   @@index([status])
+  @@index([userId, status])
+  @@index([userId, createdAt])
 }
 
 model Candidate {
@@ -103,6 +107,8 @@ model Candidate {
   @@index([hiringRequestId])
   @@index([status])
   @@index([email])
+  @@index([hiringRequestId, status])
+  @@index([hiringRequestId, matchScore])
 }
 
 model HiringSession {
@@ -118,6 +124,7 @@ model HiringSession {
 
   @@index([userId])
   @@index([status])
+  @@index([userId, updatedAt])
 }
 
 model ApiKey {
@@ -257,6 +264,7 @@ model TopUpRecord {
   @@index([userId])
   @@index([stripeSessionId])
   @@index([stripePaymentIntent])
+  @@index([userId, createdAt])
 }
 
 model AdminAdjustment {
@@ -343,4 +351,6 @@ model ResumeJobFit {
   @@index([hiringRequestId])
   @@index([fitScore])
   @@index([pipelineStatus])
+  @@index([hiringRequestId, pipelineStatus])
+  @@index([hiringRequestId, fitScore])
 }

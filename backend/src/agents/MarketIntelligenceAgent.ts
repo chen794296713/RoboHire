@@ -15,7 +15,7 @@ Given a job description, requirements, and an ideal candidate profile, provide a
 
 ### 1. Salary Ranges
 Provide salary ranges broken down by:
-- **Region**: At least 2-3 major markets (e.g., US/Bay Area, US/National, Europe, Asia)
+- **Region**: At least 2-3 major markets (e.g., US/Bay Area, US/National, China/Beijing, China/Shanghai, China/National, Europe, Asia)
 - **Level**: Match the seniority from the requirements
 - Include currency, low/high range, and any notes about equity/bonus expectations
 

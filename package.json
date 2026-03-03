@@ -20,9 +20,11 @@
     "services:restart": "./scripts/restart.sh"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "prisma": "^7.3.0"
   },
   "dependencies": {
+    "@prisma/client": "^7.4.2",
     "multer": "^2.0.2"
   }
 }
