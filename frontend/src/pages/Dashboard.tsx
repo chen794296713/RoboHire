@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE } from '../config';
 import SEO from '../components/SEO';
+import AutoMatchPanel from '../components/AutoMatchPanel';
 
 interface HiringRequest {
   id: string;
@@ -474,6 +475,12 @@ export default function Dashboard() {
                     />
                   </div>
                 </div>
+
+                {/* Auto-Match Resume Panel */}
+                <AutoMatchPanel
+                  hiringRequest={selectedRequest}
+                  onCandidatesUpdated={() => fetchRequestDetail(selectedRequest.id)}
+                />
 
                 <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
                   <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">

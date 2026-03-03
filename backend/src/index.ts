@@ -32,16 +32,25 @@ import { documentStorage } from './services/DocumentStorageService.js';
 
 const app = express();
 const PORT = process.env.PORT || 4607;
+const frontendUrlsFromEnv = (process.env.FRONTEND_URLS || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
+const productionOrigins = [
+  process.env.FRONTEND_URL || 'https://robohire.io',
+  'https://robohire.io',
+  'https://www.robohire.io',
+  'https://api.robohire.io',
+  ...frontendUrlsFromEnv,
+  // Render static sites use *.onrender.com; include previews to avoid auth breakage on Render domains.
+  /^https:\/\/[a-z0-9-]+\.onrender\.com$/i,
+];
 
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? [
-        process.env.FRONTEND_URL || 'https://robohire.io',
-        'https://robohire.io',
-        'https://www.robohire.io',
-        'https://api.robohire.io',
-      ]
+    ? productionOrigins
     : ['http://localhost:3607', 'http://localhost:5173'],
   credentials: true,
 }));

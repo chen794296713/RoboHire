@@ -741,6 +741,46 @@ export interface JobFitResult {
   candidateSummary: string;
 }
 
+// Screening Types (one-job-many-resumes)
+export interface ScreeningInput {
+  hiringRequest: {
+    id: string;
+    title: string;
+    requirements: string;
+    jobDescription?: string;
+  };
+  resumes: Array<{
+    resumeId: string;
+    name: string;
+    resumeText: string;
+    parsedSummary: string;
+  }>;
+}
+
+export interface ScreeningResult {
+  screenings: Array<{
+    resumeId: string;
+    fitScore: number;
+    fitGrade: string;
+    verdict: 'Strong Fit' | 'Good Fit' | 'Moderate Fit' | 'Weak Fit' | 'Not a Fit';
+    matchedSkills: string[];
+    missingCriticalSkills: string[];
+    experienceAlignment: string;
+    topReasons: string[];
+    recommendation: string;
+    hardRequirementGaps?: Array<{
+      requirement: string;
+      severity: string;
+      candidateStatus: string;
+    }>;
+    transferableSkills?: Array<{
+      required: string;
+      candidateHas: string;
+      relevance: string;
+    }>;
+  }>;
+}
+
 // API Response Types
 export interface APIResponse<T> {
   success: boolean;

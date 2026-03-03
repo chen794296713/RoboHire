@@ -327,6 +327,7 @@ model ResumeJobFit {
   fitScore         Int?
   fitGrade         String?
   fitData          Json?
+  pipelineStatus   String   @default("matched") // matched, shortlisted, rejected, invited
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -337,4 +338,5 @@ model ResumeJobFit {
   @@index([resumeId])
   @@index([hiringRequestId])
   @@index([fitScore])
+  @@index([pipelineStatus])
 }
