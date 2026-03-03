@@ -6,7 +6,7 @@ import SEO from '../components/SEO';
 import Navbar from '../components/landing/Navbar';
 import Footer from '../components/landing/Footer';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE } from '../config';
+import { API_BASE, STRIPE_ENABLED } from '../config';
 
 interface PlanFeature {
   text: string;
@@ -384,22 +384,24 @@ export default function Pricing() {
                     </svg>
                   </button>
 
-                  <button
-                    onClick={() => handlePaymentMethodSelect('stripe')}
-                    disabled={loadingTier === selectedPlan.id}
-                    className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <svg className="w-8 h-8" viewBox="0 0 48 48" fill="none">
-                        <rect width="48" height="48" rx="8" fill="#635BFF"/>
-                        <text x="24" y="30" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">Credit Card</text>
+                  {STRIPE_ENABLED && (
+                    <button
+                      onClick={() => handlePaymentMethodSelect('stripe')}
+                      disabled={loadingTier === selectedPlan.id}
+                      className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <svg className="w-8 h-8" viewBox="0 0 48 48" fill="none">
+                          <rect width="48" height="48" rx="8" fill="#635BFF"/>
+                          <text x="24" y="30" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">Credit Card</text>
+                        </svg>
+                        <span className="font-medium text-gray-900">Credit Card</span>
+                      </div>
+                      <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                      <span className="font-medium text-gray-900">Credit Card</span>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
