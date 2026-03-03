@@ -9,6 +9,7 @@ import { API_BASE } from '../config';
 import type { HiringTemplate } from '../data/hiringTemplates';
 import { getLocalizedTemplates } from '../data/hiringTemplates';
 import SEO from '../components/SEO';
+import PostCreationPanel from '../components/PostCreationPanel';
 
 interface Message {
   id: string;
@@ -38,6 +39,7 @@ export default function StartHiring() {
   const [, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [step, setStep] = useState<'initial' | 'requirements' | 'confirm' | 'complete'>('initial');
+  const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
   const [hiringData, setHiringData] = useState({
     title: '',
     requirements: '',
@@ -613,6 +615,9 @@ export default function StartHiring() {
       const data = await response.json();
 
       if (data.success) {
+        if (data.data?.id) {
+          setCreatedRequestId(data.data.id);
+        }
         await addMessage(
           'assistant',
           t('hiring.success', 'Your hiring request has been created! 🎉\n\n') +
@@ -1186,7 +1191,11 @@ export default function StartHiring() {
                   </div>
                 )}
 
-                {step === 'complete' && isAuthenticated && (
+                {step === 'complete' && isAuthenticated && createdRequestId && (
+                  <PostCreationPanel hiringRequestId={createdRequestId} />
+                )}
+
+                {step === 'complete' && isAuthenticated && !createdRequestId && (
                   <div className="flex justify-center pt-4">
                     <Link
                       to="/dashboard"

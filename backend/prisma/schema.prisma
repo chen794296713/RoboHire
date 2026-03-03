@@ -71,11 +71,13 @@ model HiringRequest {
   title           String
   requirements    String   @db.Text
   jobDescription  String?  @db.Text
-  status          String   @default("active") // active, paused, closed
-  webhookUrl      String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  status                String   @default("active") // active, paused, closed
+  webhookUrl            String?
+  intelligenceData      Json?
+  intelligenceUpdatedAt DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   candidates     Candidate[]
   resumeJobFits  ResumeJobFit[]

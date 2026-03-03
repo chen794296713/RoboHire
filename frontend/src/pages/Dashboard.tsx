@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { API_BASE } from '../config';
 import SEO from '../components/SEO';
 import AutoMatchPanel from '../components/AutoMatchPanel';
+import IntelligenceReportPanel from '../components/IntelligenceReportPanel';
 
 interface HiringRequest {
   id: string;
@@ -475,6 +476,9 @@ export default function Dashboard() {
                     />
                   </div>
                 </div>
+
+                {/* Recruitment Intelligence Report */}
+                <IntelligenceReportPanel hiringRequestId={selectedRequest.id} />
 
                 {/* Auto-Match Resume Panel */}
                 <AutoMatchPanel

@@ -781,6 +781,106 @@ export interface ScreeningResult {
   }>;
 }
 
+// Recruitment Intelligence Types (Multi-Agent)
+export interface RecruitmentIntelligenceInput {
+  title: string;
+  requirements: string;
+  jobDescription?: string;
+}
+
+export interface SourcingStrategyInput extends RecruitmentIntelligenceInput {
+  candidateProfile: CandidateProfileResult;
+}
+
+export interface MarketIntelligenceInput extends RecruitmentIntelligenceInput {
+  candidateProfile: CandidateProfileResult;
+}
+
+export interface CandidateProfileResult {
+  candidatePersonaSummary: string;
+  idealBackground: {
+    typicalDegrees: string[];
+    typicalCareerPath: string[];
+    yearsOfExperience: string;
+    industryBackground: string[];
+  };
+  skillMapping: {
+    mustHave: Array<{ skill: string; seniorityExpectation: string; reason: string }>;
+    niceToHave: Array<{ skill: string; valueAdd: string }>;
+  };
+  personalityTraits: {
+    traits: Array<{ trait: string; importance: 'Critical' | 'High' | 'Medium'; reason: string }>;
+    cultureFitIndicators: string[];
+  };
+  dayInTheLife: string;
+}
+
+export interface SourcingStrategyResult {
+  sourcingSummary: string;
+  platforms: Array<{
+    platform: string;
+    effectiveness: 'High' | 'Medium' | 'Low';
+    strategy: string;
+    searchKeywords?: string[];
+  }>;
+  booleanSearchStrings: string[];
+  targetCompanies: Array<{ company: string; reason: string }>;
+  targetIndustries: string[];
+  passiveVsActive: {
+    recommendation: 'Passive' | 'Active' | 'Both';
+    passiveStrategy: string;
+    activeStrategy: string;
+  };
+  networkingStrategies: Array<{
+    strategy: string;
+    expectedYield: 'High' | 'Medium' | 'Low';
+    details: string;
+  }>;
+}
+
+export interface MarketIntelligenceResult {
+  marketSummary: string;
+  salaryRanges: Array<{
+    region: string;
+    level: string;
+    rangeLow: string;
+    rangeHigh: string;
+    currency: string;
+    notes: string;
+  }>;
+  supplyDemand: {
+    assessment: 'Oversupplied' | 'Balanced' | 'Undersupplied' | 'Severely Undersupplied';
+    details: string;
+    talentPoolSize: string;
+  };
+  recruitmentDifficulty: {
+    score: number;
+    level: string;
+    factors: string[];
+  };
+  timeToHire: {
+    estimateDays: string;
+    factors: string[];
+  };
+  competition: Array<{
+    competitor: string;
+    hiringActivity: string;
+    relevance: string;
+  }>;
+  marketTrends: Array<{
+    trend: string;
+    impact: 'Positive' | 'Negative' | 'Neutral';
+    details: string;
+  }>;
+}
+
+export interface RecruitmentIntelligenceReport {
+  candidateProfile: CandidateProfileResult;
+  sourcingStrategy: SourcingStrategyResult;
+  marketIntelligence: MarketIntelligenceResult;
+  generatedAt: string;
+}
+
 // API Response Types
 export interface APIResponse<T> {
   success: boolean;

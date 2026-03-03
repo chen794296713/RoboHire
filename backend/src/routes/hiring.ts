@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import prisma from '../lib/prisma.js';
+import { Prisma } from '@prisma/client';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';
 import { llmService } from '../services/llm/LLMService.js';
 import { languageService } from '../services/LanguageService.js';
@@ -7,6 +8,7 @@ import { generateRequestId, logger } from '../services/LoggerService.js';
 import { createJDAgent } from '../agents/CreateJDAgent.js';
 import { screeningAgent } from '../agents/ScreeningAgent.js';
 import { inviteAgent } from '../agents/InviteAgent.js';
+import { recruitmentIntelligenceService } from '../services/RecruitmentIntelligenceService.js';
 // Import auth types to extend Express
 import '../types/auth.js';
 
@@ -433,6 +435,9 @@ router.patch('/:id', async (req, res) => {
       });
     }
 
+    // Invalidate intelligence cache when requirements or JD change
+    const invalidateIntelligence = requirements !== undefined || jobDescription !== undefined;
+
     const hiringRequest = await prisma.hiringRequest.update({
       where: { id },
       data: {
@@ -441,6 +446,7 @@ router.patch('/:id', async (req, res) => {
         ...(jobDescription !== undefined && { jobDescription }),
         ...(webhookUrl !== undefined && { webhookUrl }),
         ...(status !== undefined && { status }),
+        ...(invalidateIntelligence && { intelligenceData: Prisma.DbNull, intelligenceUpdatedAt: null }),
       },
     });
 
@@ -1108,6 +1114,71 @@ router.post('/:id/batch-invite-from-library', async (req, res) => {
     console.error('Batch invite from library error:', error);
     logger.endRequest(requestId, 'error', 500);
     return res.status(500).json({ success: false, error: 'Failed to batch invite from library' });
+  }
+});
+
+/**
+ * POST /api/v1/hiring-requests/:id/intelligence
+ * Generate (or retrieve cached) recruitment intelligence report
+ */
+router.post('/:id/intelligence', async (req, res) => {
+  const requestId = generateRequestId();
+  logger.startRequest(requestId, `/api/v1/hiring-requests/${req.params.id}/intelligence`, 'POST');
+
+  try {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    const { force = false } = req.body || {};
+
+    const report = await recruitmentIntelligenceService.generate(
+      id, userId, { force }, requestId
+    );
+
+    logger.endRequest(requestId, 'success', 200);
+    return res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    logger.error('INTEL', 'Intelligence report generation failed', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }, requestId);
+    logger.endRequest(requestId, 'error', 500);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to generate intelligence report',
+    });
+  }
+});
+
+/**
+ * GET /api/v1/hiring-requests/:id/intelligence
+ * Fetch cached recruitment intelligence report
+ */
+router.get('/:id/intelligence', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user!.id;
+
+    const hr = await prisma.hiringRequest.findFirst({
+      where: { id, userId },
+      select: { intelligenceData: true, intelligenceUpdatedAt: true },
+    });
+
+    if (!hr) {
+      return res.status(404).json({ success: false, error: 'Hiring request not found' });
+    }
+
+    return res.json({
+      success: true,
+      data: hr.intelligenceData || null,
+      generatedAt: hr.intelligenceUpdatedAt || null,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch intelligence report',
+    });
   }
 });
 
