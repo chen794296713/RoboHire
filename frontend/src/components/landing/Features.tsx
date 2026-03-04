@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 export default function Features() {
@@ -7,14 +8,17 @@ export default function Features() {
     {
       title: t('landing.features.aiScreening.title', 'AI Resume Screening'),
       description: t('landing.features.aiScreening.description', 'Our AI analyzes every resume against your requirements, identifying must-have skills and experience gaps.'),
+      docLink: '/docs/api/match-resume',
     },
     {
       title: t('landing.features.autoInterviews.title', 'Automated Interviews'),
       description: t('landing.features.autoInterviews.description', 'AI conducts initial screening interviews 24/7, asking relevant questions and evaluating responses.'),
+      docLink: '/docs/api/invite-candidate',
     },
     {
       title: t('landing.features.evalReports.title', 'Evaluation Reports'),
       description: t('landing.features.evalReports.description', 'Get comprehensive reports with skill assessments, interview analysis, and hiring recommendations.'),
+      docLink: '/docs/api/evaluate-interview',
     },
     {
       title: t('landing.features.timeSavings.title', '90% Time Savings'),
@@ -23,10 +27,12 @@ export default function Features() {
     {
       title: t('landing.features.apiAccess.title', 'Developer API'),
       description: t('landing.features.apiAccess.description', 'Full REST API access for parsing, matching, and evaluation. Integrate AI hiring into your systems.'),
+      docLink: '/docs/quick-start',
     },
     {
       title: t('landing.features.webhooks.title', 'Webhook Delivery'),
       description: t('landing.features.webhooks.description', 'Receive shortlisted candidates and evaluation reports automatically via webhooks.'),
+      docLink: '/docs/webhooks',
     },
     {
       title: t('landing.features.multilingual.title', 'Multilingual Support'),
@@ -35,6 +41,7 @@ export default function Features() {
     {
       title: t('landing.features.cheatingDetection.title', 'Cheating Detection'),
       description: t('landing.features.cheatingDetection.description', 'Advanced AI analysis to detect AI-assisted answers, ensuring genuine candidate evaluation.'),
+      docLink: '/docs/api/evaluate-interview',
     },
   ];
 
@@ -70,6 +77,17 @@ export default function Features() {
               <p className="mt-3 text-sm leading-relaxed text-slate-600">
                 {feature.description}
               </p>
+              {feature.docLink && (
+                <Link
+                  to={feature.docLink}
+                  className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 transition-colors hover:text-blue-700"
+                >
+                  {t('landing.features.learnMore', 'Learn more')}
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+              )}
             </article>
           ))}
         </div>

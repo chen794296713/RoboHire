@@ -6,6 +6,10 @@ Allow: /developers
 Allow: /start-hiring
 Allow: /quick-invite
 Allow: /request-demo
+Allow: /about
+Allow: /blog
+Allow: /privacy
+Allow: /terms
 Allow: /docs/
 
 # Block protected/internal routes

@@ -5,11 +5,12 @@
   <!-- Homepage -->
   <url>
     <loc>https://robohire.io/</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/?lang=fr"/>
@@ -21,11 +22,12 @@
   <!-- Pricing -->
   <url>
     <loc>https://robohire.io/pricing</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/pricing?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/pricing?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/pricing?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/pricing?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/pricing?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/pricing?lang=fr"/>
@@ -37,11 +39,12 @@
   <!-- Start Hiring -->
   <url>
     <loc>https://robohire.io/start-hiring</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/start-hiring?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/start-hiring?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/start-hiring?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/start-hiring?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/start-hiring?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/start-hiring?lang=fr"/>
@@ -53,11 +56,12 @@
   <!-- Quick Invite -->
   <url>
     <loc>https://robohire.io/quick-invite</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/quick-invite?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/quick-invite?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/quick-invite?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/quick-invite?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/quick-invite?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/quick-invite?lang=fr"/>
@@ -69,11 +73,12 @@
   <!-- Developers / API Landing -->
   <url>
     <loc>https://robohire.io/developers</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/developers?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/developers?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/developers?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/developers?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/developers?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/developers?lang=fr"/>
@@ -85,11 +90,12 @@
   <!-- Request Demo -->
   <url>
     <loc>https://robohire.io/request-demo</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/request-demo?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/request-demo?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/request-demo?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/request-demo?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/request-demo?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/request-demo?lang=fr"/>
@@ -98,14 +104,83 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://robohire.io/request-demo"/>
   </url>
 
+  <!-- About -->
+  <url>
+    <loc>https://robohire.io/about</loc>
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/about?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/about?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/about?lang=zh-TW"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/about?lang=ja"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/about?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/about?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://robohire.io/about?lang=pt"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://robohire.io/about?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://robohire.io/about"/>
+  </url>
+
+  <!-- Blog -->
+  <url>
+    <loc>https://robohire.io/blog</loc>
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/blog?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/blog?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/blog?lang=zh-TW"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/blog?lang=ja"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/blog?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/blog?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://robohire.io/blog?lang=pt"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://robohire.io/blog?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://robohire.io/blog"/>
+  </url>
+
+  <!-- Privacy Policy -->
+  <url>
+    <loc>https://robohire.io/privacy</loc>
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/privacy?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/privacy?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/privacy?lang=zh-TW"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/privacy?lang=ja"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/privacy?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/privacy?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://robohire.io/privacy?lang=pt"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://robohire.io/privacy?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://robohire.io/privacy"/>
+  </url>
+
+  <!-- Terms of Service -->
+  <url>
+    <loc>https://robohire.io/terms</loc>
+    <lastmod>2026-03-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/terms?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/terms?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/terms?lang=zh-TW"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/terms?lang=ja"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/terms?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/terms?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="pt" href="https://robohire.io/terms?lang=pt"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://robohire.io/terms?lang=de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://robohire.io/terms"/>
+  </url>
+
   <!-- Documentation -->
   <url>
     <loc>https://robohire.io/docs/overview</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/docs/overview?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/docs/overview?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/docs/overview?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/docs/overview?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/docs/overview?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/docs/overview?lang=fr"/>
@@ -115,11 +190,12 @@
   </url>
   <url>
     <loc>https://robohire.io/docs/quick-start</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/docs/quick-start?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/docs/quick-start?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/docs/quick-start?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/docs/quick-start?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/docs/quick-start?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/docs/quick-start?lang=fr"/>
@@ -129,11 +205,12 @@
   </url>
   <url>
     <loc>https://robohire.io/docs/authentication</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://robohire.io/docs/authentication?lang=en"/>
     <xhtml:link rel="alternate" hreflang="zh" href="https://robohire.io/docs/authentication?lang=zh"/>
+    <xhtml:link rel="alternate" hreflang="zh-TW" href="https://robohire.io/docs/authentication?lang=zh-TW"/>
     <xhtml:link rel="alternate" hreflang="ja" href="https://robohire.io/docs/authentication?lang=ja"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://robohire.io/docs/authentication?lang=es"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://robohire.io/docs/authentication?lang=fr"/>
@@ -143,43 +220,43 @@
   </url>
   <url>
     <loc>https://robohire.io/docs/api/match-resume</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://robohire.io/docs/api/parse-resume</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://robohire.io/docs/api/parse-jd</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://robohire.io/docs/api/invite-candidate</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://robohire.io/docs/api/evaluate-interview</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://robohire.io/docs/webhooks</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://robohire.io/docs/errors</loc>
-    <lastmod>2026-02-27</lastmod>
+    <lastmod>2026-03-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

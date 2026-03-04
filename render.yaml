@@ -75,6 +75,18 @@ services:
       - path: /*
         name: X-Frame-Options
         value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
     routes:
       # SPA fallback — serve index.html for all non-file paths
       - type: rewrite

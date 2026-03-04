@@ -89,7 +89,11 @@
       "stat1": "Zeit gespart",
       "stat2": "Schnelleres Screening",
       "stat3": "Unternehmen",
-      "stat4": "Rund um die Uhr"
+      "stat4": "Rund um die Uhr",
+      "stat1Context": "Durchschnittliche Reduzierung der Screening-Zeit",
+      "stat2Context": "Im Vergleich zur manuellen Prüfung",
+      "stat3Context": "Vertrauen RoboHire bei der Einstellung",
+      "stat4Context": "KI schläft nie und macht keine Pausen"
     },
     "services": {
       "title": "Drei leistungsstarke Wege zur Einstellung",
@@ -183,7 +187,8 @@
       "cheatingDetection": {
         "title": "Cheating‑Erkennung",
         "description": "KI erkennt AI‑Assistenz und bewertet echte Fähigkeiten."
-      }
+      },
+      "learnMore": "Mehr erfahren"
     },
     "cta": {
       "title": "Bereit für smarteres Recruiting?",
@@ -223,6 +228,70 @@
       "cookies": "Cookies",
       "security": "Sicherheit",
       "rights": "Alle Rechte vorbehalten."
+    },
+    "faq": {
+      "badge": "FAQ",
+      "title": "Häufig gestellte Fragen",
+      "items": {
+        "0": {
+          "q": "Was ist RoboHire?",
+          "a": "RoboHire ist eine KI-gestützte Recruiting-Plattform, die Lebensläufe automatisch sichtet, KI-geführte Interviews durchführt und für jeden Kandidaten strukturierte Bewertungsberichte erstellt."
+        },
+        "1": {
+          "q": "Wie funktioniert das KI-Lebenslauf-Screening?",
+          "a": "Unsere KI analysiert Lebensläufe anhand Ihrer Stellenanforderungen und bewertet Kandidaten nach Fähigkeiten, Erfahrung und Eignung."
+        },
+        "2": {
+          "q": "Welche Sprachen unterstützt RoboHire?",
+          "a": "RoboHire unterstützt 7 Sprachen: Englisch, Chinesisch, Japanisch, Spanisch, Französisch, Portugiesisch und Deutsch."
+        },
+        "3": {
+          "q": "Gibt es eine kostenlose Testversion?",
+          "a": "Ja! Sie können mit unserem kostenlosen Starter-Plan ohne Kosten beginnen."
+        },
+        "4": {
+          "q": "Wie funktioniert das KI-Interview?",
+          "a": "RoboHire generiert maßgeschneiderte Interviewfragen basierend auf den Stellenanforderungen und dem Kandidatenprofil."
+        },
+        "5": {
+          "q": "Sind meine Daten sicher?",
+          "a": "Absolut. Wir verwenden branchenübliche Verschlüsselung. Daten sind pro Konto isoliert und werden niemals weitergegeben."
+        },
+        "6": {
+          "q": "Kann ich RoboHire in meine bestehenden Tools integrieren?",
+          "a": "Ja, RoboHire bietet eine REST API und Webhook-Unterstützung für die Integration."
+        }
+      }
+    },
+    "testimonials": {
+      "badge": "Kundenstimmen",
+      "title": "Von Recruiting-Teams weltweit geschätzt",
+      "items": {
+        "0": {
+          "quote": "RoboHire hat unsere Screening-Zeit um 85 % reduziert.",
+          "name": "Sarah Chen",
+          "role": "Leiterin Talent Acquisition",
+          "company": "TechFlow"
+        },
+        "1": {
+          "quote": "Die API-Integration war nahtlos.",
+          "name": "Marcus Weber",
+          "role": "CTO",
+          "company": "ScaleUp GmbH"
+        },
+        "2": {
+          "quote": "Die mehrsprachige Unterstützung war ein entscheidender Vorteil.",
+          "name": "Yuki Tanaka",
+          "role": "HR-Direktorin",
+          "company": "NexGen"
+        },
+        "3": {
+          "quote": "Die Bewertungsberichte sind unglaublich detailliert.",
+          "name": "Ana Costa",
+          "role": "Recruiting-Leiterin",
+          "company": "Rapido"
+        }
+      }
     }
   },
   "apiLanding": {
@@ -1538,6 +1607,329 @@
       "save": "Speichern",
       "saving": "Wird gespeichert...",
       "saved": "Gespeichert!"
+    }
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "heading": "Seite nicht gefunden",
+    "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "backHome": "Zurück zur Startseite",
+    "viewDocs": "Dokumentation ansehen"
+  },
+  "breadcrumb": {
+    "home": "Startseite",
+    "about": "Über uns",
+    "blog": "Blog",
+    "privacy": "Datenschutzrichtlinie",
+    "terms": "Nutzungsbedingungen"
+  },
+  "about": {
+    "seo": {
+      "title": "Über RoboHire - KI-gestützte Recruiting-Plattform",
+      "description": "Erfahren Sie mehr über die Mission von RoboHire, Einstellungen mit KI zu demokratisieren."
+    },
+    "hero": {
+      "title": "Über RoboHire",
+      "subtitle": "Wir bauen die Zukunft des Recruitings."
+    },
+    "mission": {
+      "title": "Unsere Mission",
+      "text": "Einstellungen mit KI demokratisieren."
+    },
+    "vision": {
+      "title": "Unsere Vision",
+      "text": "Eine Welt, in der jedes Unternehmen die besten Talente einstellt."
+    },
+    "tech": {
+      "title": "So funktioniert unsere KI",
+      "subtitle": "RoboHire kombiniert Sprachmodelle mit Recruiting-Expertise.",
+      "items": {
+        "0": {
+          "title": "Lebenslauf-Analyse",
+          "description": "Unsere KI extrahiert strukturierte Daten aus Lebensläufen."
+        },
+        "1": {
+          "title": "Matching-Algorithmen",
+          "description": "Fortschrittliche Sprachmodelle vergleichen Profile mit Anforderungen."
+        },
+        "2": {
+          "title": "Automatisierte Interviews",
+          "description": "KI-geführte Interviews, die sich in Echtzeit anpassen."
+        },
+        "3": {
+          "title": "Bewertungsberichte",
+          "description": "Umfassende Bewertungsberichte mit detaillierten Aufschlüsselungen."
+        }
+      }
+    },
+    "stats": {
+      "companies": {
+        "value": "500+",
+        "label": "Unternehmen"
+      },
+      "languages": {
+        "value": "7",
+        "label": "Sprachen"
+      },
+      "timeSaved": {
+        "value": "90%",
+        "label": "Zeitersparnis"
+      },
+      "availability": {
+        "value": "24/7",
+        "label": "Verfügbarkeit"
+      }
+    },
+    "comparison": {
+      "title": "Warum RoboHire vs. Alternativen",
+      "subtitle": "Sehen Sie, wie RoboHire im Vergleich abschneidet.",
+      "header": {
+        "feature": "Funktion",
+        "robohire": "RoboHire",
+        "manual": "Manuelle Einstellung",
+        "ats": "Traditionelles ATS"
+      },
+      "features": {
+        "setup": "Einrichtungszeit",
+        "screening": "Lebenslauf-Screening",
+        "interviews": "Interviewprozess",
+        "evaluation": "Kandidatenbewertung",
+        "multilingual": "Mehrsprachige Unterstützung",
+        "bias": "Vorurteilsreduzierung",
+        "cost": "Kosten"
+      },
+      "robohire": {
+        "setup": "Minuten",
+        "screening": "KI-gestützt, sofort",
+        "interviews": "Automatisierte KI-Interviews",
+        "evaluation": "Umfassende KI-Berichte",
+        "multilingual": "7 Sprachen integriert",
+        "bias": "Konsistente KI-Bewertung",
+        "cost": "Ab $29/Monat"
+      },
+      "manual": {
+        "setup": "Wochen",
+        "screening": "Manuell, Stunden pro Lebenslauf",
+        "interviews": "Manuell planen und durchführen",
+        "evaluation": "Subjektive Notizen",
+        "multilingual": "Abhängig vom Team",
+        "bias": "Anfällig für unbewusste Vorurteile",
+        "cost": "Hoch (Recruiter-Stunden)"
+      },
+      "ats": {
+        "setup": "Tage",
+        "screening": "Schlüsselwortbasierte Filterung",
+        "interviews": "Nur Terminplanung",
+        "evaluation": "Einfache Scorecards",
+        "multilingual": "Eingeschränkt oder nicht vorhanden",
+        "bias": "Schlüsselwort-Bias",
+        "cost": "$200-500/Monat+"
+      },
+      "cta": "Jetzt intelligenter einstellen"
+    },
+    "trust": {
+      "title": "Vertrauen und Sicherheit",
+      "subtitle": "Die Sicherheit Ihrer Daten hat für uns höchste Priorität.",
+      "items": {
+        "encryption": {
+          "title": "Ende-zu-Ende-Verschlüsselung",
+          "description": "Alle Daten werden bei der Übertragung und im Ruhezustand verschlüsselt."
+        },
+        "privacy": {
+          "title": "Datenschutz-Konformität",
+          "description": "Vollständig konform mit GDPR und CCPA."
+        },
+        "soc2": {
+          "title": "SOC 2-konform",
+          "description": "Unsere Infrastruktur erfüllt die SOC 2 Type II-Standards."
+        }
+      }
+    },
+    "cta": {
+      "title": "Bereit, Ihre Einstellung zu transformieren?",
+      "subtitle": "Schließen Sie sich Hunderten von Unternehmen an, die intelligenter einstellen.",
+      "primary": "Kostenlos starten",
+      "secondary": "Demo anfordern"
+    }
+  },
+  "privacy": {
+    "seo": {
+      "title": "Datenschutzrichtlinie",
+      "description": "Wie RoboHire mit Ihren Informationen umgeht."
+    },
+    "title": "Datenschutzrichtlinie",
+    "lastUpdated": "Letzte Aktualisierung: März 2026",
+    "sections": {
+      "collect": {
+        "title": "1. Informationen, die wir erheben",
+        "content": {
+          "p1": "Wir erheben Informationen, die Sie bereitstellen.",
+          "p2": "Wir erheben Lebensläufe, Stellenbeschreibungen und Bewertungsdaten."
+        }
+      },
+      "use": {
+        "title": "2. Wie wir Ihre Informationen verwenden",
+        "content": {
+          "p1": "Wir verwenden Informationen zur Bereitstellung und Verbesserung unserer Dienste.",
+          "p2": "Wir verwenden sie zur Kommunikation mit Ihnen."
+        }
+      },
+      "storage": {
+        "title": "3. Datenspeicherung und Sicherheit",
+        "content": {
+          "p1": "Gespeichert auf sicheren Servern.",
+          "p2": "Nur so lange aufbewahrt wie nötig."
+        }
+      },
+      "thirdParty": {
+        "title": "4. Drittanbieter-Dienste",
+        "content": {
+          "p1": "Wir nutzen vertrauenswürdige Drittanbieter-Dienste.",
+          "p2": "Wir verkaufen Ihre Informationen nicht."
+        }
+      },
+      "rights": {
+        "title": "5. Ihre Rechte (GDPR, CCPA)",
+        "content": {
+          "p1": "Ihnen stehen bestimmte Rechte zu.",
+          "p2": "Recht auf Auskunft, Berichtigung und Löschung.",
+          "p3": "Kontaktieren Sie uns unter privacy@robohire.io."
+        }
+      },
+      "cookies": {
+        "title": "6. Cookies",
+        "content": {
+          "p1": "Wir verwenden essentielle Cookies.",
+          "p2": "Wir können Analyse-Cookies verwenden."
+        }
+      },
+      "contact": {
+        "title": "7. Kontakt",
+        "content": {
+          "p1": "Fragen zu dieser Datenschutzrichtlinie:",
+          "email": "E-Mail: privacy@robohire.io",
+          "address": "RoboHire Inc."
+        }
+      }
+    },
+    "nav": {
+      "terms": "Nutzungsbedingungen",
+      "home": "Zurück zur Startseite"
+    }
+  },
+  "terms": {
+    "seo": {
+      "title": "Nutzungsbedingungen",
+      "description": "Lesen Sie die Nutzungsbedingungen von RoboHire."
+    },
+    "title": "Nutzungsbedingungen",
+    "lastUpdated": "Letzte Aktualisierung: März 2026",
+    "sections": {
+      "acceptance": {
+        "title": "1. Annahme der Bedingungen",
+        "content": {
+          "p1": "Durch den Zugriff auf RoboHire stimmen Sie diesen Bedingungen zu.",
+          "p2": "Wir können diese Bedingungen aktualisieren."
+        }
+      },
+      "service": {
+        "title": "2. Beschreibung des Dienstes",
+        "content": {
+          "p1": "RoboHire ist eine KI-gestützte Recruiting-Plattform.",
+          "p2": "Wir behalten uns das Recht vor, den Dienst zu ändern."
+        }
+      },
+      "accounts": {
+        "title": "3. Benutzerkonten",
+        "content": {
+          "p1": "Sie sind für Ihr Konto verantwortlich.",
+          "p2": "Geben Sie korrekte Informationen an."
+        }
+      },
+      "use": {
+        "title": "4. Zulässige Nutzung",
+        "content": {
+          "p1": "Nutzung nur für rechtmäßige Zwecke.",
+          "p2": "Kein unbefugter Zugriff."
+        }
+      },
+      "ip": {
+        "title": "5. Geistiges Eigentum",
+        "content": {
+          "p1": "Die Inhalte des Dienstes sind Eigentum von RoboHire.",
+          "p2": "Sie behalten das Eigentum an Ihren hochgeladenen Daten."
+        }
+      },
+      "liability": {
+        "title": "6. Haftungsbeschränkung",
+        "content": {
+          "p1": "Keine Haftung für indirekte Schäden.",
+          "p2": "KI-Bewertungen sind Entscheidungshilfen."
+        }
+      },
+      "termination": {
+        "title": "7. Kündigung",
+        "content": {
+          "p1": "Kündigen Sie Ihr Konto jederzeit.",
+          "p2": "Der Zugang endet mit der Kündigung."
+        }
+      },
+      "contact": {
+        "title": "8. Kontakt",
+        "content": {
+          "p1": "Fragen zu diesen Bedingungen:",
+          "email": "E-Mail: legal@robohire.io",
+          "address": "RoboHire Inc."
+        }
+      }
+    },
+    "nav": {
+      "privacy": "Datenschutzrichtlinie",
+      "home": "Zurück zur Startseite"
+    }
+  },
+  "blog": {
+    "seo": {
+      "title": "Ressourcen und Einblicke",
+      "description": "Artikel über KI-gestütztes Recruiting."
+    },
+    "badge": "Blog",
+    "title": "Ressourcen und Einblicke",
+    "subtitle": "Entdecken Sie Artikel und bewährte Methoden.",
+    "readTime": "{{time}} Lesezeit",
+    "readMore": "Weiterlesen",
+    "articles": {
+      "0": {
+        "title": "Wie KI das Recruiting 2026 verändert",
+        "description": "KI verändert die Einstellungspraxis.",
+        "category": "Branchentrends"
+      },
+      "1": {
+        "title": "Best Practices für Lebenslauf-Screening",
+        "description": "Skalierung der Einstellung ohne Qualitätsverlust.",
+        "category": "Best Practices"
+      },
+      "2": {
+        "title": "Automatisierte Interviews: Ein vollständiger Leitfaden",
+        "description": "Alles über KI-Interviews.",
+        "category": "Leitfäden"
+      },
+      "3": {
+        "title": "Entwickeln mit der RoboHire API",
+        "description": "Schritt-für-Schritt-Anleitung für Entwickler.",
+        "category": "Engineering"
+      },
+      "4": {
+        "title": "Mehrsprachige Einstellung: Globale Talente erreichen",
+        "description": "Einstellen über Grenzen hinweg.",
+        "category": "Globale Einstellung"
+      }
+    },
+    "cta": {
+      "title": "Bereit, RoboHire in Aktion zu sehen?",
+      "subtitle": "Starten Sie noch heute mit KI-gestützter Einstellung.",
+      "primary": "Kostenlos einstellen",
+      "secondary": "API entdecken"
     }
   }
 }

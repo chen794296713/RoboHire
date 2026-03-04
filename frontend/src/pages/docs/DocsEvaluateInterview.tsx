@@ -130,7 +130,7 @@ result = response.json()`,
 
   return (
     <div>
-      <SEO title={t('seo.docsEvaluateInterview.title', 'Evaluate Interview API')} description={t('seo.docsEvaluateInterview.desc', 'API reference for AI-powered interview evaluation. Get comprehensive candidate assessment reports.')} url="https://robohire.io/docs/api/evaluate-interview" keywords={t('seo.docsEvaluateInterview.keywords', 'RoboHire API documentation, interview evaluation API, AI candidate assessment, hiring automation')} />
+      <SEO title={t('seo.docsEvaluateInterview.title', 'Evaluate Interview API')} description={t('seo.docsEvaluateInterview.desc', 'API reference for AI-powered interview evaluation. Get comprehensive candidate assessment reports.')} url="https://robohire.io/docs/api/evaluate-interview" keywords={t('seo.docsEvaluateInterview.keywords', 'RoboHire API documentation, interview evaluation API, AI candidate assessment, hiring automation')} structuredData={{ '@type': 'TechArticle', headline: 'Evaluate Interview API Reference', description: 'AI-powered interview evaluation and candidate assessment.', url: 'https://robohire.io/docs/api/evaluate-interview', author: { '@type': 'Organization', name: 'RoboHire' }, datePublished: '2024-01-01', proficiencyLevel: 'Intermediate' }} />
       <h1 className="text-3xl font-bold text-slate-900 landing-display mb-4">
         {t('docs.evaluateInterview.title', 'Evaluate Interview')}
       </h1>

@@ -13,8 +13,14 @@ interface SEOProps {
 }
 
 const SITE_URL = 'https://robohire.io';
-const DEFAULT_IMAGE = '/og-image.png';
-const SUPPORTED_LANGS = ['en', 'zh', 'ja', 'es', 'fr', 'pt', 'de'];
+const DEFAULT_IMAGE = '/robohire.png';
+const SUPPORTED_LANGS = ['en', 'zh', 'zh-TW', 'ja', 'es', 'fr', 'pt', 'de'];
+
+const LANG_LOCALE_MAP: Record<string, string> = {
+  en: 'en_US', zh: 'zh_CN', 'zh-TW': 'zh_TW', ja: 'ja_JP',
+  es: 'es_ES', fr: 'fr_FR', pt: 'pt_BR', de: 'de_DE',
+};
+function langToLocale(lang: string) { return LANG_LOCALE_MAP[lang] || `${lang}_${lang.toUpperCase()}`; }
 
 export default function SEO({
   title,
@@ -27,7 +33,7 @@ export default function SEO({
   structuredData,
 }: SEOProps) {
   const { t, i18n } = useTranslation();
-  const currentLang = i18n.language?.substring(0, 2) || 'en';
+  const currentLang = i18n.language || 'en';
 
   const defaultTitle = t('seo.defaultTitle', 'RoboHire - AI-Powered Hiring Platform');
   const defaultDesc = t('seo.defaultDescription', 'Hire elite candidates before others. Our AI hiring agent automatically screens resumes, conducts interviews, and delivers comprehensive evaluation reports.');
@@ -81,9 +87,9 @@ export default function SEO({
       <meta property="og:description" content={finalDesc} />
       <meta property="og:image" content={imageUrl} />
       <meta property="og:site_name" content="RoboHire" />
-      <meta property="og:locale" content={currentLang === 'zh' ? 'zh_CN' : currentLang === 'ja' ? 'ja_JP' : currentLang === 'pt' ? 'pt_BR' : `${currentLang}_${currentLang.toUpperCase()}`} />
+      <meta property="og:locale" content={langToLocale(currentLang)} />
       {SUPPORTED_LANGS.filter(l => l !== currentLang).map(lang => (
-        <meta key={lang} property="og:locale:alternate" content={lang === 'zh' ? 'zh_CN' : lang === 'ja' ? 'ja_JP' : lang === 'pt' ? 'pt_BR' : `${lang}_${lang.toUpperCase()}`} />
+        <meta key={lang} property="og:locale:alternate" content={langToLocale(lang)} />
       ))}
 
       {/* Twitter */}
@@ -110,6 +116,7 @@ export default function SEO({
           url: SITE_URL,
           logo: `${SITE_URL}/favicon.svg`,
           description: defaultDesc,
+          foundingDate: '2024',
           sameAs: [
             'https://twitter.com/robohireio',
             'https://linkedin.com/company/robohire',
@@ -137,7 +144,7 @@ export default function SEO({
         })}
       </script>
 
-      {/* Structured Data - WebSite with SearchAction */}
+      {/* Structured Data - WebSite with SearchAction + SpeakableSpecification */}
       <script type="application/ld+json">
         {JSON.stringify({
           '@context': 'https://schema.org',
@@ -150,6 +157,10 @@ export default function SEO({
             '@type': 'SearchAction',
             target: `${SITE_URL}/docs?q={search_term_string}`,
             'query-input': 'required name=search_term_string',
+          },
+          speakable: {
+            '@type': 'SpeakableSpecification',
+            cssSelector: ['h1', 'meta[name="description"]'],
           },
         })}
       </script>

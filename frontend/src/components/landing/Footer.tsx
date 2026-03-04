@@ -27,10 +27,17 @@ export default function Footer() {
     resources: {
       title: t('landing.footer.resources', 'Resources'),
       links: [
+        { label: t('landing.footer.about', 'About'), href: '/about' },
+        { label: t('landing.footer.blog', 'Blog'), href: '/blog' },
         { label: t('landing.footer.requestDemo', 'Request Demo'), href: '/request-demo' },
-        { label: t('landing.footer.quickInvite', 'Quick Invite'), href: '/quick-invite' },
-        { label: t('landing.footer.startHiringLink', 'Start Hiring'), href: '/start-hiring' },
         { label: t('landing.footer.login', 'Log In'), href: '/login' },
+      ],
+    },
+    legal: {
+      title: t('landing.footer.legal', 'Legal'),
+      links: [
+        { label: t('landing.footer.privacy', 'Privacy Policy'), href: '/privacy' },
+        { label: t('landing.footer.terms', 'Terms of Service'), href: '/terms' },
       ],
     },
   };

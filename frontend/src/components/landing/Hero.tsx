@@ -5,10 +5,10 @@ export default function Hero() {
   const { t } = useTranslation();
 
   const stats = [
-    { value: '90%', label: t('landing.hero.stat1', 'Time Saved') },
-    { value: '10x', label: t('landing.hero.stat2', 'Faster Screening') },
-    { value: '500+', label: t('landing.hero.stat3', 'Companies') },
-    { value: '24/7', label: t('landing.hero.stat4', 'Always Available') },
+    { value: '90%', label: t('landing.hero.stat1', 'Time Saved'), context: t('landing.hero.stat1Context', 'Average screening time reduction') },
+    { value: '10x', label: t('landing.hero.stat2', 'Faster Screening'), context: t('landing.hero.stat2Context', 'Compared to manual review') },
+    { value: '500+', label: t('landing.hero.stat3', 'Companies'), context: t('landing.hero.stat3Context', 'Trust RoboHire for hiring') },
+    { value: '24/7', label: t('landing.hero.stat4', 'Always Available'), context: t('landing.hero.stat4Context', 'AI never sleeps or takes breaks') },
   ];
 
   const showcaseItems = [
@@ -82,6 +82,7 @@ export default function Hero() {
               <div key={stat.label} className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-[0_18px_34px_-28px_rgba(15,23,42,0.75)] backdrop-blur">
                 <p className="landing-display text-2xl font-semibold text-slate-900 sm:text-3xl">{stat.value}</p>
                 <p className="mt-1 text-sm font-medium text-slate-500">{stat.label}</p>
+                <p className="mt-0.5 text-xs text-slate-400">{stat.context}</p>
               </div>
             ))}
           </div>

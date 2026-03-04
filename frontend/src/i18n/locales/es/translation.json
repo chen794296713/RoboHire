@@ -89,7 +89,11 @@
       "stat1": "Tiempo ahorrado",
       "stat2": "Selección más rápida",
       "stat3": "Empresas",
-      "stat4": "Disponible 24/7"
+      "stat4": "Disponible 24/7",
+      "stat1Context": "Reducción promedio del tiempo de selección",
+      "stat2Context": "Comparado con la revisión manual",
+      "stat3Context": "Confían en RoboHire para contratar",
+      "stat4Context": "La IA nunca duerme ni toma descansos"
     },
     "services": {
       "title": "Tres formas poderosas de contratar",
@@ -183,7 +187,8 @@
       "cheatingDetection": {
         "title": "Detección de trampa",
         "description": "Análisis avanzado para detectar respuestas asistidas por IA y evaluar capacidades reales."
-      }
+      },
+      "learnMore": "Más información"
     },
     "cta": {
       "title": "¿Listo para contratar mejor?",
@@ -223,6 +228,70 @@
       "cookies": "Cookies",
       "security": "Seguridad",
       "rights": "Todos los derechos reservados."
+    },
+    "faq": {
+      "badge": "Preguntas frecuentes",
+      "title": "Preguntas frecuentes",
+      "items": [
+        {
+          "q": "¿Qué es RoboHire?",
+          "a": "RoboHire es una plataforma de reclutamiento impulsada por IA que automatiza la selección de currículos, realiza entrevistas con IA y genera informes de evaluación estructurados para cada candidato."
+        },
+        {
+          "q": "¿Cómo funciona la selección de currículos con IA?",
+          "a": "Nuestra IA analiza los currículos comparándolos con los requisitos de tu puesto, puntuando a los candidatos en habilidades, experiencia y ajuste. Procesa cientos de currículos en minutos."
+        },
+        {
+          "q": "¿Qué idiomas soporta RoboHire?",
+          "a": "RoboHire soporta 7 idiomas: inglés, chino (simplificado y tradicional), japonés, español, francés, portugués y alemán."
+        },
+        {
+          "q": "¿Hay una prueba gratuita?",
+          "a": "¡Sí! Puedes comenzar con nuestro plan Starter gratuito que incluye coincidencias de currículos y evaluaciones de entrevistas sin costo."
+        },
+        {
+          "q": "¿Cómo funciona la entrevista con IA?",
+          "a": "RoboHire genera preguntas de entrevista personalizadas basadas en los requisitos del puesto y el perfil del candidato."
+        },
+        {
+          "q": "¿Están seguros mis datos?",
+          "a": "Absolutamente. Utilizamos cifrado estándar de la industria. Tus datos de reclutamiento están aislados por cuenta y nunca se comparten con terceros."
+        },
+        {
+          "q": "¿Puedo integrar RoboHire con mis herramientas existentes?",
+          "a": "Sí, RoboHire ofrece una API REST completa y soporte de webhooks para una integración fluida."
+        }
+      ]
+    },
+    "testimonials": {
+      "badge": "Testimonios",
+      "title": "Equipos de contratación de todo el mundo confían en nosotros",
+      "items": [
+        {
+          "quote": "RoboHire redujo nuestro tiempo de selección en un 85%.",
+          "name": "Sarah Chen",
+          "role": "Directora de Talento",
+          "company": "TechFlow"
+        },
+        {
+          "quote": "La integración con la API fue impecable.",
+          "name": "Marcus Weber",
+          "role": "CTO",
+          "company": "ScaleUp GmbH"
+        },
+        {
+          "quote": "El soporte multilingüe fue un cambio total.",
+          "name": "Yuki Tanaka",
+          "role": "Directora de RRHH",
+          "company": "NexGen"
+        },
+        {
+          "quote": "Los informes de evaluación son increíblemente detallados.",
+          "name": "Ana Costa",
+          "role": "Líder de Reclutamiento",
+          "company": "Rapido"
+        }
+      ]
     }
   },
   "apiLanding": {
@@ -1539,6 +1608,329 @@
       "save": "Guardar",
       "saving": "Guardando...",
       "saved": "¡Guardado!"
+    }
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "heading": "Página no encontrada",
+    "description": "La página que buscas no existe o ha sido movida.",
+    "backHome": "Volver al inicio",
+    "viewDocs": "Ver documentación"
+  },
+  "breadcrumb": {
+    "home": "Inicio",
+    "about": "Nosotros",
+    "blog": "Blog",
+    "privacy": "Política de privacidad",
+    "terms": "Términos de servicio"
+  },
+  "about": {
+    "seo": {
+      "title": "Sobre RoboHire - Plataforma de reclutamiento con IA",
+      "description": "Conoce la misión de RoboHire de democratizar la contratación con IA."
+    },
+    "hero": {
+      "title": "Sobre RoboHire",
+      "subtitle": "Estamos construyendo el futuro del reclutamiento."
+    },
+    "mission": {
+      "title": "Nuestra misión",
+      "text": "Democratizar la contratación con IA."
+    },
+    "vision": {
+      "title": "Nuestra visión",
+      "text": "Un mundo donde cada empresa contrate al mejor talento."
+    },
+    "tech": {
+      "title": "Cómo funciona nuestra IA",
+      "subtitle": "RoboHire combina modelos de lenguaje con experiencia en reclutamiento.",
+      "items": [
+        {
+          "title": "Análisis de currículos",
+          "description": "Nuestra IA extrae datos estructurados de los currículos."
+        },
+        {
+          "title": "Algoritmos de coincidencia",
+          "description": "Modelos de lenguaje avanzados comparan perfiles con los requisitos."
+        },
+        {
+          "title": "Entrevistas automatizadas",
+          "description": "Las entrevistas con IA se adaptan en tiempo real."
+        },
+        {
+          "title": "Informes de evaluación",
+          "description": "Informes completos de puntuación con desgloses detallados."
+        }
+      ]
+    },
+    "stats": {
+      "companies": {
+        "value": "500+",
+        "label": "Empresas"
+      },
+      "languages": {
+        "value": "7",
+        "label": "Idiomas"
+      },
+      "timeSaved": {
+        "value": "90%",
+        "label": "Tiempo ahorrado"
+      },
+      "availability": {
+        "value": "24/7",
+        "label": "Disponibilidad"
+      }
+    },
+    "comparison": {
+      "title": "Por qué RoboHire frente a las alternativas",
+      "subtitle": "Descubre cómo se compara RoboHire.",
+      "header": {
+        "feature": "Característica",
+        "robohire": "RoboHire",
+        "manual": "Contratación manual",
+        "ats": "ATS tradicional"
+      },
+      "features": {
+        "setup": "Tiempo de configuración",
+        "screening": "Selección de currículos",
+        "interviews": "Proceso de entrevistas",
+        "evaluation": "Evaluación de candidatos",
+        "multilingual": "Soporte multilingüe",
+        "bias": "Reducción de sesgos",
+        "cost": "Costo"
+      },
+      "robohire": {
+        "setup": "Minutos",
+        "screening": "Con IA, instantáneo",
+        "interviews": "Entrevistas automatizadas con IA",
+        "evaluation": "Informes completos con IA",
+        "multilingual": "7 idiomas integrados",
+        "bias": "Evaluación consistente con IA",
+        "cost": "Desde $29/mes"
+      },
+      "manual": {
+        "setup": "Semanas",
+        "screening": "Manual, horas por currículo",
+        "interviews": "Programar y realizar manualmente",
+        "evaluation": "Notas subjetivas",
+        "multilingual": "Depende del equipo",
+        "bias": "Propenso a sesgos inconscientes",
+        "cost": "Alto (horas de reclutador)"
+      },
+      "ats": {
+        "setup": "Días",
+        "screening": "Filtrado por palabras clave",
+        "interviews": "Solo programación",
+        "evaluation": "Fichas de puntuación básicas",
+        "multilingual": "Limitado o inexistente",
+        "bias": "Sesgo por palabras clave",
+        "cost": "$200-500/mes+"
+      },
+      "cta": "Empieza a contratar de forma más inteligente"
+    },
+    "trust": {
+      "title": "Confianza y seguridad",
+      "subtitle": "La seguridad de tus datos es nuestra máxima prioridad.",
+      "items": {
+        "encryption": {
+          "title": "Cifrado de extremo a extremo",
+          "description": "Todos los datos cifrados en tránsito y en reposo."
+        },
+        "privacy": {
+          "title": "Cumplimiento de privacidad",
+          "description": "Totalmente compatible con GDPR y CCPA."
+        },
+        "soc2": {
+          "title": "Compatible con SOC 2",
+          "description": "La infraestructura cumple con los estándares SOC 2 Tipo II."
+        }
+      }
+    },
+    "cta": {
+      "title": "¿Listo para transformar tu proceso de contratación?",
+      "subtitle": "Únete a cientos de empresas que contratan de forma más inteligente.",
+      "primary": "Comienza gratis",
+      "secondary": "Solicita una demo"
+    }
+  },
+  "privacy": {
+    "seo": {
+      "title": "Política de privacidad",
+      "description": "Cómo RoboHire recopila, utiliza y protege tu información."
+    },
+    "title": "Política de privacidad",
+    "lastUpdated": "Última actualización: marzo de 2026",
+    "sections": {
+      "collect": {
+        "title": "1. Información que recopilamos",
+        "content": {
+          "p1": "Recopilamos la información que nos proporcionas directamente.",
+          "p2": "Cuando utilizas RoboHire, recopilamos currículos, descripciones de puestos, etc."
+        }
+      },
+      "use": {
+        "title": "2. Cómo utilizamos tu información",
+        "content": {
+          "p1": "Utilizamos la información para proporcionar y mejorar nuestros servicios.",
+          "p2": "También la utilizamos para comunicarnos contigo."
+        }
+      },
+      "storage": {
+        "title": "3. Almacenamiento y seguridad de datos",
+        "content": {
+          "p1": "Tus datos se almacenan en servidores seguros.",
+          "p2": "Conservamos los datos solo el tiempo necesario."
+        }
+      },
+      "thirdParty": {
+        "title": "4. Servicios de terceros",
+        "content": {
+          "p1": "Utilizamos servicios de terceros de confianza.",
+          "p2": "No vendemos tu información personal."
+        }
+      },
+      "rights": {
+        "title": "5. Tus derechos (GDPR, CCPA)",
+        "content": {
+          "p1": "Puedes tener ciertos derechos sobre tus datos.",
+          "p2": "Estos incluyen derechos de acceso, corrección y eliminación.",
+          "p3": "Contáctanos en privacy@robohire.io."
+        }
+      },
+      "cookies": {
+        "title": "6. Cookies",
+        "content": {
+          "p1": "Utilizamos cookies esenciales.",
+          "p2": "También podemos utilizar cookies de análisis."
+        }
+      },
+      "contact": {
+        "title": "7. Contáctanos",
+        "content": {
+          "p1": "Preguntas sobre esta Política de Privacidad:",
+          "email": "Correo electrónico: privacy@robohire.io",
+          "address": "RoboHire Inc."
+        }
+      }
+    },
+    "nav": {
+      "terms": "Términos de servicio",
+      "home": "Volver al inicio"
+    }
+  },
+  "terms": {
+    "seo": {
+      "title": "Términos de servicio",
+      "description": "Lee los Términos de Servicio de RoboHire."
+    },
+    "title": "Términos de servicio",
+    "lastUpdated": "Última actualización: marzo de 2026",
+    "sections": {
+      "acceptance": {
+        "title": "1. Aceptación de los términos",
+        "content": {
+          "p1": "Al acceder a RoboHire, aceptas estos Términos.",
+          "p2": "Podemos actualizar estos Términos."
+        }
+      },
+      "service": {
+        "title": "2. Descripción del servicio",
+        "content": {
+          "p1": "RoboHire es una plataforma de reclutamiento impulsada por IA.",
+          "p2": "Nos reservamos el derecho de modificar el Servicio."
+        }
+      },
+      "accounts": {
+        "title": "3. Cuentas de usuario",
+        "content": {
+          "p1": "Eres responsable de tu cuenta.",
+          "p2": "Proporciona información precisa."
+        }
+      },
+      "use": {
+        "title": "4. Uso aceptable",
+        "content": {
+          "p1": "Utiliza el Servicio solo con fines legales.",
+          "p2": "No intentes acceder sin autorización."
+        }
+      },
+      "ip": {
+        "title": "5. Propiedad intelectual",
+        "content": {
+          "p1": "El contenido del Servicio es propiedad de RoboHire.",
+          "p2": "Conservas la propiedad de los datos que subes."
+        }
+      },
+      "liability": {
+        "title": "6. Limitación de responsabilidad",
+        "content": {
+          "p1": "RoboHire no es responsable por daños indirectos.",
+          "p2": "Las evaluaciones con IA son herramientas de apoyo a la decisión."
+        }
+      },
+      "termination": {
+        "title": "7. Terminación",
+        "content": {
+          "p1": "Puedes cancelar tu cuenta en cualquier momento.",
+          "p2": "Tras la cancelación, se suspenderá el acceso."
+        }
+      },
+      "contact": {
+        "title": "8. Contacto",
+        "content": {
+          "p1": "Preguntas sobre estos Términos:",
+          "email": "Correo electrónico: legal@robohire.io",
+          "address": "RoboHire Inc."
+        }
+      }
+    },
+    "nav": {
+      "privacy": "Política de privacidad",
+      "home": "Volver al inicio"
+    }
+  },
+  "blog": {
+    "seo": {
+      "title": "Recursos e información - Blog de reclutamiento con IA",
+      "description": "Artículos de expertos sobre reclutamiento con IA."
+    },
+    "badge": "Blog",
+    "title": "Recursos e información",
+    "subtitle": "Explora artículos y mejores prácticas.",
+    "readTime": "{{time}} de lectura",
+    "readMore": "Leer más",
+    "articles": [
+      {
+        "title": "Cómo la IA está transformando el reclutamiento en 2026",
+        "description": "La IA está redefiniendo la contratación.",
+        "category": "Tendencias del sector"
+      },
+      {
+        "title": "Mejores prácticas en la selección de currículos",
+        "description": "Escalar la contratación sin sacrificar la calidad.",
+        "category": "Mejores prácticas"
+      },
+      {
+        "title": "Entrevistas automatizadas: guía completa",
+        "description": "Todo sobre las entrevistas con IA.",
+        "category": "Guías"
+      },
+      {
+        "title": "Desarrollando con la API de RoboHire",
+        "description": "Guía práctica para desarrolladores.",
+        "category": "Ingeniería"
+      },
+      {
+        "title": "Contratación multilingüe: alcanzando talento global",
+        "description": "Contratar más allá de las fronteras.",
+        "category": "Contratación global"
+      }
+    ],
+    "cta": {
+      "title": "¿Listo para ver RoboHire en acción?",
+      "subtitle": "Empieza a contratar con IA hoy.",
+      "primary": "Empieza a contratar gratis",
+      "secondary": "Explorar la API"
     }
   }
 }

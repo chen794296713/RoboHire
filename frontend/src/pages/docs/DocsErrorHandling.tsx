@@ -115,7 +115,7 @@ export default function DocsErrorHandling() {
 
   return (
     <div>
-      <SEO title={t('seo.docsErrorHandling.title', 'Error Handling')} description={t('seo.docsErrorHandling.desc', 'RoboHire API error codes, response formats, and troubleshooting guide.')} url="https://robohire.io/docs/error-handling" keywords={t('seo.docsErrorHandling.keywords', 'RoboHire API documentation, error handling, API error codes, troubleshooting')} />
+      <SEO title={t('seo.docsErrorHandling.title', 'Error Handling')} description={t('seo.docsErrorHandling.desc', 'RoboHire API error codes, response formats, and troubleshooting guide.')} url="https://robohire.io/docs/error-handling" keywords={t('seo.docsErrorHandling.keywords', 'RoboHire API documentation, error handling, API error codes, troubleshooting')} structuredData={{ '@type': 'TechArticle', headline: 'API Error Handling Guide', description: 'RoboHire API error codes, response formats, and troubleshooting.', url: 'https://robohire.io/docs/error-handling', author: { '@type': 'Organization', name: 'RoboHire' }, datePublished: '2024-01-01', proficiencyLevel: 'Intermediate' }} />
       <h1 className="text-3xl font-bold text-slate-900 landing-display mb-4">
         {t('docs.errors.title', 'Error Handling')}
       </h1>

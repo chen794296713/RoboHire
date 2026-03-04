@@ -8,7 +8,7 @@ export default function DocsAuthentication() {
 
   return (
     <div>
-      <SEO title={t('seo.docsAuth.title', 'API Authentication')} description={t('seo.docsAuth.desc', 'Learn how to authenticate with the RoboHire API using API keys and JWT tokens.')} url="https://robohire.io/docs/authentication" keywords={t('seo.docsAuth.keywords', 'RoboHire API documentation, API authentication, API keys, JWT tokens')} />
+      <SEO title={t('seo.docsAuth.title', 'API Authentication')} description={t('seo.docsAuth.desc', 'Learn how to authenticate with the RoboHire API using API keys and JWT tokens.')} url="https://robohire.io/docs/authentication" keywords={t('seo.docsAuth.keywords', 'RoboHire API documentation, API authentication, API keys, JWT tokens')} structuredData={{ '@type': 'TechArticle', headline: 'RoboHire API Authentication', description: 'Learn how to authenticate with the RoboHire API using API keys and JWT tokens.', url: 'https://robohire.io/docs/authentication', author: { '@type': 'Organization', name: 'RoboHire' }, datePublished: '2024-01-01', proficiencyLevel: 'Beginner' }} />
       <h1 className="text-3xl font-bold text-slate-900 landing-display mb-4">
         {t('docs.auth.title', 'Authentication')}
       </h1>

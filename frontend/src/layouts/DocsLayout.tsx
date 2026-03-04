@@ -54,6 +54,12 @@ export default function DocsLayout() {
 
   const currentPage = currentSection?.items.find(item => location.pathname === item.href);
 
+  // Flatten all nav items for prev/next
+  const allItems = useMemo(() => navigation.flatMap(s => s.items), [navigation]);
+  const currentIndex = allItems.findIndex(item => item.href === location.pathname);
+  const prevPage = currentIndex > 0 ? allItems[currentIndex - 1] : null;
+  const nextPage = currentIndex >= 0 && currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : null;
+
   const breadcrumbSchema = useMemo(() => {
     if (!currentSection || !currentPage) return null;
     return {
@@ -240,17 +246,42 @@ export default function DocsLayout() {
             <div className="mt-16 pt-8 border-t border-slate-200">
               <div className="flex items-center justify-between">
                 <div>
-                  {/* Previous link would go here */}
+                  {prevPage ? (
+                    <Link
+                      to={prevPage.href}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                      </svg>
+                      {prevPage.title}
+                    </Link>
+                  ) : (
+                    <div />
+                  )}
                 </div>
-                <Link
-                  to="/api-playground"
-                  className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  {t('docs.footer.tryPlayground', 'Try in Playground')}
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </Link>
+                <div className="flex items-center gap-6">
+                  <Link
+                    to="/api-playground"
+                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    {t('docs.footer.tryPlayground', 'Try in Playground')}
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </Link>
+                  {nextPage && (
+                    <Link
+                      to={nextPage.href}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-blue-600"
+                    >
+                      {nextPage.title}
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -67,7 +67,7 @@ app.post('/webhook', (req, res) => {
 
   return (
     <div>
-      <SEO title={t('seo.docsWebhooks.title', 'Webhooks')} description={t('seo.docsWebhooks.desc', 'Configure webhooks to receive real-time notifications about hiring events and interview completions.')} url="https://robohire.io/docs/webhooks" keywords={t('seo.docsWebhooks.keywords', 'RoboHire API documentation, webhooks, real-time notifications, hiring events')} />
+      <SEO title={t('seo.docsWebhooks.title', 'Webhooks')} description={t('seo.docsWebhooks.desc', 'Configure webhooks to receive real-time notifications about hiring events and interview completions.')} url="https://robohire.io/docs/webhooks" keywords={t('seo.docsWebhooks.keywords', 'RoboHire API documentation, webhooks, real-time notifications, hiring events')} structuredData={{ '@type': 'TechArticle', headline: 'Webhooks Configuration Guide', description: 'Configure webhooks for real-time hiring event notifications.', url: 'https://robohire.io/docs/webhooks', author: { '@type': 'Organization', name: 'RoboHire' }, datePublished: '2024-01-01', proficiencyLevel: 'Advanced' }} />
       <h1 className="text-3xl font-bold text-slate-900 landing-display mb-4">
         {t('docs.webhooks.title', 'Webhooks')}
       </h1>

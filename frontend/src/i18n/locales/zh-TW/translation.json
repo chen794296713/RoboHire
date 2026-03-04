@@ -118,7 +118,11 @@
       "stat1": "節省時間",
       "stat2": "篩選更快",
       "stat3": "合作企業",
-      "stat4": "全天候服務"
+      "stat4": "全天候服務",
+      "stat1Context": "平均篩選時間縮減",
+      "stat2Context": "相比人工審核",
+      "stat3Context": "信賴 RoboHire 進行招聘",
+      "stat4Context": "AI 全天候不間斷運作"
     },
     "services": {
       "title": "三種高效招聘方式",
@@ -212,7 +216,8 @@
       "cheatingDetection": {
         "title": "作弊檢測",
         "description": "先進的 AI 分析來檢測 AI 輔助回答，確保您評估的是真實的候選人能力。"
-      }
+      },
+      "learnMore": "瞭解更多"
     },
     "cta": {
       "title": "準備好智慧招聘了嗎？",
@@ -252,6 +257,70 @@
       "cookies": "Cookie 政策",
       "security": "安全",
       "rights": "版權所有。"
+    },
+    "faq": {
+      "badge": "常見問題",
+      "title": "常見問題解答",
+      "items": {
+        "0": {
+          "q": "什麼是 RoboHire？",
+          "a": "RoboHire 是一款 AI 驅動的招聘平台，能自動篩選簡歷、進行 AI 面試，並為每位候選人生成結構化的評估報告。"
+        },
+        "1": {
+          "q": "AI 簡歷篩選如何運作？",
+          "a": "我們的 AI 會根據您的職位要求分析簡歷，從技能、經驗和契合度進行評分。數分鐘內即可處理數百份簡歷，自動找出最佳匹配。"
+        },
+        "2": {
+          "q": "RoboHire 支援哪些語言？",
+          "a": "RoboHire 支援 7 種語言：英語、簡體中文、繁體中文、日語、西班牙語、法語、葡萄牙語和德語。"
+        },
+        "3": {
+          "q": "有免費試用嗎？",
+          "a": "有！您可以從免費的入門方案開始，包含簡歷匹配和面試評估功能，無需信用卡。"
+        },
+        "4": {
+          "q": "AI 面試如何運作？",
+          "a": "RoboHire 根據職位要求和候選人背景生成客製化面試題目。AI 進行結構化面試、評估回答，並產出包含評分的詳細評估報告。"
+        },
+        "5": {
+          "q": "我的資料安全嗎？",
+          "a": "絕對安全。我們採用業界標準加密技術保護靜態和傳輸中的資料。您的招聘資料按帳戶隔離，絕不與第三方共享。我們符合 GDPR 和 SOC 2 標準。"
+        },
+        "6": {
+          "q": "RoboHire 能與現有工具整合嗎？",
+          "a": "可以，RoboHire 提供完整的 REST API 和 Webhook 支援，可與您現有的 ATS、人資系統和工作流程無縫整合。"
+        }
+      }
+    },
+    "testimonials": {
+      "badge": "客戶見證",
+      "title": "全球招聘團隊的信賴之選",
+      "items": {
+        "0": {
+          "quote": "RoboHire 將我們的篩選時間縮減了 85%。從花 3 天審閱簡歷，到幾小時內就能獲得匹配的候選人。",
+          "name": "Sarah Chen",
+          "role": "人才招聘主管",
+          "company": "TechFlow"
+        },
+        "1": {
+          "quote": "API 整合非常順暢，我們在一個衝刺週期內就把 AI 招聘功能嵌入了我們的平台。文件寫得非常好。",
+          "name": "Marcus Weber",
+          "role": "技術長",
+          "company": "ScaleUp GmbH"
+        },
+        "2": {
+          "quote": "多語言支援對我們的全球招聘來說是一大突破。AI 用日語面試的效果和英語一樣出色。",
+          "name": "Yuki Tanaka",
+          "role": "人資總監",
+          "company": "NexGen"
+        },
+        "3": {
+          "quote": "評估報告非常詳盡，幫助我們做出更客觀的招聘決策，減少偏見。",
+          "name": "Ana Costa",
+          "role": "招聘主管",
+          "company": "Rapido"
+        }
+      }
     }
   },
   "hiring": {
@@ -1962,6 +2031,329 @@
       "save": "儲存",
       "saving": "儲存中...",
       "saved": "已儲存！"
+    }
+  },
+  "notFound": {
+    "title": "找不到頁面",
+    "heading": "頁面不存在",
+    "description": "您尋找的頁面不存在或已被移動。",
+    "backHome": "返回首頁",
+    "viewDocs": "查看文件"
+  },
+  "breadcrumb": {
+    "home": "首頁",
+    "about": "關於我們",
+    "blog": "部落格",
+    "privacy": "隱私政策",
+    "terms": "服務條款"
+  },
+  "about": {
+    "seo": {
+      "title": "關於 RoboHire - AI 驅動的招聘平台",
+      "description": "瞭解 RoboHire 如何以 AI 技術讓招聘更民主化。"
+    },
+    "hero": {
+      "title": "關於 RoboHire",
+      "subtitle": "我們正在打造招聘的未來。我們的 AI 驅動平台幫助企業更快、更公平、更智慧地發掘、評估和錄用最優秀的人才。"
+    },
+    "mission": {
+      "title": "我們的使命",
+      "text": "以 AI 實現招聘民主化。我們相信每家企業都應該擁有智慧招聘工具，消除偏見、節省時間，並找到最佳候選人。"
+    },
+    "vision": {
+      "title": "我們的願景",
+      "text": "一個每家企業都能招到頂尖人才的世界。招聘決策由數據和洞察驅動，而非直覺與猜測。"
+    },
+    "tech": {
+      "title": "我們的 AI 技術",
+      "subtitle": "RoboHire 結合最先進的語言模型與招聘專業知識，自動化招聘流程的每一步。",
+      "items": {
+        "0": {
+          "title": "簡歷解析",
+          "description": "我們的 AI 能從任何格式的簡歷中提取結構化資料——PDF、Word 或純文字。"
+        },
+        "1": {
+          "title": "匹配演算法",
+          "description": "先進的語言模型將候選人背景與職位要求進行比對。"
+        },
+        "2": {
+          "title": "自動面試",
+          "description": "AI 主導的面試能即時調整，提出追問問題。"
+        },
+        "3": {
+          "title": "評估報告",
+          "description": "包含詳細評分、細項分析和可操作建議的完整報告。"
+        }
+      }
+    },
+    "stats": {
+      "companies": {
+        "value": "500+",
+        "label": "合作企業"
+      },
+      "languages": {
+        "value": "7",
+        "label": "支援語言"
+      },
+      "timeSaved": {
+        "value": "90%",
+        "label": "時間節省"
+      },
+      "availability": {
+        "value": "24/7",
+        "label": "全天候服務"
+      }
+    },
+    "comparison": {
+      "title": "為什麼選擇 RoboHire",
+      "subtitle": "看看 RoboHire 與人工招聘和傳統 ATS 的比較。",
+      "header": {
+        "feature": "功能",
+        "robohire": "RoboHire",
+        "manual": "人工招聘",
+        "ats": "傳統 ATS"
+      },
+      "features": {
+        "setup": "設定時間",
+        "screening": "簡歷篩選",
+        "interviews": "面試流程",
+        "evaluation": "候選人評估",
+        "multilingual": "多語言支援",
+        "bias": "減少偏見",
+        "cost": "費用"
+      },
+      "robohire": {
+        "setup": "幾分鐘",
+        "screening": "AI 驅動，即時完成",
+        "interviews": "自動化 AI 面試",
+        "evaluation": "全面的 AI 報告",
+        "multilingual": "內建 7 種語言",
+        "bias": "一致的 AI 評估",
+        "cost": "每月 $29 起"
+      },
+      "manual": {
+        "setup": "數週",
+        "screening": "人工，每份簡歷需數小時",
+        "interviews": "手動安排與進行",
+        "evaluation": "主觀記錄",
+        "multilingual": "取決於團隊",
+        "bias": "易受無意識偏見影響",
+        "cost": "高（招聘人員工時）"
+      },
+      "ats": {
+        "setup": "數天",
+        "screening": "關鍵字篩選",
+        "interviews": "僅安排面試",
+        "evaluation": "基本評分卡",
+        "multilingual": "有限或不支援",
+        "bias": "關鍵字偏見",
+        "cost": "$200-500/月以上"
+      },
+      "cta": "開始智慧招聘"
+    },
+    "trust": {
+      "title": "信任與安全",
+      "subtitle": "您的資料安全是我們的首要任務。",
+      "items": {
+        "encryption": {
+          "title": "端到端加密",
+          "description": "所有資料在傳輸中（TLS 1.3）和靜態儲存時（AES-256）均經過加密。"
+        },
+        "privacy": {
+          "title": "隱私合規",
+          "description": "完全符合 GDPR、CCPA 及其他隱私法規。"
+        },
+        "soc2": {
+          "title": "SOC 2 合規",
+          "description": "基礎設施達到 SOC 2 Type II 標準。"
+        }
+      }
+    },
+    "cta": {
+      "title": "準備好改變您的招聘方式了嗎？",
+      "subtitle": "加入數百家已經在使用 RoboHire 進行智慧招聘的企業。",
+      "primary": "免費開始使用",
+      "secondary": "申請演示"
+    }
+  },
+  "privacy": {
+    "seo": {
+      "title": "隱私政策",
+      "description": "瞭解 RoboHire 如何收集、使用和保護您的個人資訊。"
+    },
+    "title": "隱私政策",
+    "lastUpdated": "最後更新：2026 年 3 月",
+    "sections": {
+      "collect": {
+        "title": "1. 我們收集的資訊",
+        "content": {
+          "p1": "我們收集您直接提供的資訊...",
+          "p2": "當您使用 RoboHire 處理候選人時..."
+        }
+      },
+      "use": {
+        "title": "2. 我們如何使用您的資訊",
+        "content": {
+          "p1": "我們使用這些資訊來提供、維護和改善我們的服務。",
+          "p2": "我們也會使用您的資訊與您溝通。"
+        }
+      },
+      "storage": {
+        "title": "3. 資料儲存與安全",
+        "content": {
+          "p1": "您的資料儲存在配備加密的安全伺服器上。",
+          "p2": "我們僅在必要期間保留您的個人資料。"
+        }
+      },
+      "thirdParty": {
+        "title": "4. 第三方服務",
+        "content": {
+          "p1": "我們使用受信任的第三方服務。",
+          "p2": "我們不會出售您的個人資訊。"
+        }
+      },
+      "rights": {
+        "title": "5. 您的權利（GDPR、CCPA）",
+        "content": {
+          "p1": "您可能擁有關於個人資料的某些權利。",
+          "p2": "包括存取、更正和刪除權。",
+          "p3": "請聯繫 privacy@robohire.io。"
+        }
+      },
+      "cookies": {
+        "title": "6. Cookie",
+        "content": {
+          "p1": "我們使用必要的 Cookie 來運營平台。",
+          "p2": "我們也可能使用分析 Cookie。"
+        }
+      },
+      "contact": {
+        "title": "7. 聯絡我們",
+        "content": {
+          "p1": "如果您對本隱私政策有任何疑問：",
+          "email": "郵箱：privacy@robohire.io",
+          "address": "RoboHire Inc."
+        }
+      }
+    },
+    "nav": {
+      "terms": "服務條款",
+      "home": "返回首頁"
+    }
+  },
+  "terms": {
+    "seo": {
+      "title": "服務條款",
+      "description": "閱讀 RoboHire 的服務條款。"
+    },
+    "title": "服務條款",
+    "lastUpdated": "最後更新：2026 年 3 月",
+    "sections": {
+      "acceptance": {
+        "title": "1. 條款接受",
+        "content": {
+          "p1": "存取 RoboHire 即表示您同意這些條款。",
+          "p2": "我們可能會不時更新這些條款。"
+        }
+      },
+      "service": {
+        "title": "2. 服務描述",
+        "content": {
+          "p1": "RoboHire 是一款 AI 驅動的招聘平台。",
+          "p2": "我們保留修改服務的權利。"
+        }
+      },
+      "accounts": {
+        "title": "3. 使用者帳戶",
+        "content": {
+          "p1": "您有責任維護帳戶的保密性。",
+          "p2": "您必須提供準確的資訊。"
+        }
+      },
+      "use": {
+        "title": "4. 可接受的使用",
+        "content": {
+          "p1": "您同意僅將服務用於合法目的。",
+          "p2": "您不得嘗試未經授權的存取。"
+        }
+      },
+      "ip": {
+        "title": "5. 智慧財產權",
+        "content": {
+          "p1": "服務和內容歸 RoboHire 所有。",
+          "p2": "您保留上傳資料的所有權。"
+        }
+      },
+      "liability": {
+        "title": "6. 責任限制",
+        "content": {
+          "p1": "RoboHire 不對間接損害負責。",
+          "p2": "AI 評估是決策輔助工具。"
+        }
+      },
+      "termination": {
+        "title": "7. 終止",
+        "content": {
+          "p1": "您可以隨時終止您的帳戶。",
+          "p2": "終止後，您使用服務的權利將立即停止。"
+        }
+      },
+      "contact": {
+        "title": "8. 聯絡",
+        "content": {
+          "p1": "如果您對這些條款有任何疑問：",
+          "email": "郵箱：legal@robohire.io",
+          "address": "RoboHire Inc."
+        }
+      }
+    },
+    "nav": {
+      "privacy": "隱私政策",
+      "home": "返回首頁"
+    }
+  },
+  "blog": {
+    "seo": {
+      "title": "資源與洞察 - AI 招聘部落格",
+      "description": "關於 AI 驅動招聘的專業文章。"
+    },
+    "badge": "部落格",
+    "title": "資源與洞察",
+    "subtitle": "探索文章、指南和最佳實踐，幫助您更智慧地招聘。",
+    "readTime": "{{time}}閱讀",
+    "readMore": "閱讀更多",
+    "articles": {
+      "0": {
+        "title": "2026 年 AI 如何改變招聘",
+        "description": "AI 正在重塑企業發掘和僱用人才的方式。",
+        "category": "行業趨勢"
+      },
+      "1": {
+        "title": "成長型團隊的簡歷篩選最佳實踐",
+        "description": "在不犧牲品質的前提下擴展招聘流程。",
+        "category": "最佳實踐"
+      },
+      "2": {
+        "title": "自動面試：完整指南",
+        "description": "關於 AI 驅動面試的全面解析。",
+        "category": "指南"
+      },
+      "3": {
+        "title": "使用 RoboHire API 進行開發",
+        "description": "面向開發者的 RoboHire 整合實戰攻略。",
+        "category": "技術工程"
+      },
+      "4": {
+        "title": "多語言招聘：觸達全球人才",
+        "description": "利用多語言支援進行跨國招聘。",
+        "category": "全球招聘"
+      }
+    },
+    "cta": {
+      "title": "準備好體驗 RoboHire 了嗎？",
+      "subtitle": "將這些洞察付諸實踐。立即開始使用 AI 招聘。",
+      "primary": "免費開始招聘",
+      "secondary": "探索 API"
     }
   }
 }

@@ -118,7 +118,7 @@ result = response.json()`,
 
   return (
     <div>
-      <SEO title={t('seo.docsParseJD.title', 'Parse Job Description API')} description={t('seo.docsParseJD.desc', 'API reference for job description parsing. Extract structured requirements from JDs.')} url="https://robohire.io/docs/api/parse-jd" keywords={t('seo.docsParseJD.keywords', 'RoboHire API documentation, job description parsing API, JD parser, AI recruitment')} />
+      <SEO title={t('seo.docsParseJD.title', 'Parse Job Description API')} description={t('seo.docsParseJD.desc', 'API reference for job description parsing. Extract structured requirements from JDs.')} url="https://robohire.io/docs/api/parse-jd" keywords={t('seo.docsParseJD.keywords', 'RoboHire API documentation, job description parsing API, JD parser, AI recruitment')} structuredData={{ '@type': 'TechArticle', headline: 'Parse Job Description API Reference', description: 'Extract structured requirements from job descriptions.', url: 'https://robohire.io/docs/api/parse-jd', author: { '@type': 'Organization', name: 'RoboHire' }, datePublished: '2024-01-01', proficiencyLevel: 'Intermediate' }} />
       <h1 className="text-3xl font-bold text-slate-900 landing-display mb-4">
         {t('docs.parseJD.title', 'Parse Job Description')}
       </h1>
