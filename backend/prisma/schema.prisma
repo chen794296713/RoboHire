@@ -47,7 +47,7 @@ model User {
   resumes         Resume[]
   adminAdjustmentsReceived  AdminAdjustment[] @relation("AdminAdjustmentsReceived")
   adminAdjustmentsMade      AdminAdjustment[] @relation("AdminAdjustmentsMade")
-
+  paymentRecords           PaymentRecord[]
   @@index([email])
   @@index([provider, providerId])
   @@index([createdAt])
@@ -264,6 +264,28 @@ model TopUpRecord {
   @@index([userId])
   @@index([stripeSessionId])
   @@index([stripePaymentIntent])
+  @@index([userId, createdAt])
+}
+
+model PaymentRecord {
+  id            String    @id @default(cuid())
+  userId        String
+  outTradeNo    String    @unique
+  amount        Float
+  currency      String    @default("CNY")
+  paymentMethod String
+  tier          String?
+  status        String    @default("pending")
+  tradeNo       String?
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  metadata      Json?
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([outTradeNo])
+  @@index([status])
   @@index([userId, createdAt])
 }
 

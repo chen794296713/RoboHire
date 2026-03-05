@@ -9,3 +9,6 @@
  */
 export const API_BASE: string =
   import.meta.env.VITE_API_URL || '';
+
+// Set VITE_STRIPE_ENABLED=false to hide Stripe/Credit Card payment option
+export const STRIPE_ENABLED =true;

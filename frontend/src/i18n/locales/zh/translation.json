@@ -1775,12 +1775,16 @@
       "currentBalance": "当前余额",
       "selectAmount": "选择充值金额：",
       "processing": "处理中...",
-      "success": "充值成功！余额已更新。"
+      "success": "充值成功！余额已更新。",
+      "paymentMethod": "支付方式",
+      "stripe": "信用卡",
+      "alipay": "支付宝"
     },
     "billing": {
       "title": "账单历史",
       "date": "日期",
       "description": "描述",
+      "source": "支付方式",
       "amount": "金额",
       "status": "状态",
       "action": "收据",

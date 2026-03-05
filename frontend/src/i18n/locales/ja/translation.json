@@ -1744,12 +1744,16 @@
       "currentBalance": "現在の残高",
       "selectAmount": "チャージする金額を選択してください：",
       "processing": "処理中...",
-      "success": "チャージ成功！残高が更新されました。"
+      "success": "チャージ成功！残高が更新されました。",
+      "paymentMethod": "支払い方法",
+      "stripe": "クレジットカード",
+      "alipay": "Alipay"
     },
     "billing": {
       "title": "請求履歴",
       "date": "日付",
       "description": "説明",
+      "source": "支払い方法",
       "amount": "金額",
       "status": "ステータス",
       "action": "領収書",

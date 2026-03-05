@@ -1373,12 +1373,16 @@
       "currentBalance": "Solde actuel",
       "selectAmount": "Sélectionnez un montant à ajouter à votre solde :",
       "processing": "Traitement...",
-      "success": "Rechargement réussi ! Votre solde a été mis à jour."
+      "success": "Rechargement réussi ! Votre solde a été mis à jour.",
+      "paymentMethod": "Mode de paiement",
+      "stripe": "Carte de crédit",
+      "alipay": "Alipay"
     },
     "billing": {
       "title": "Historique de facturation",
       "date": "Date",
       "description": "Description",
+      "source": "Mode de paiement",
       "amount": "Montant",
       "status": "Statut",
       "action": "Reçu",
