@@ -15,15 +15,12 @@ function getStripe(): Stripe | null {
 }
 
 // Alipay configuration
-function getAlipayConfig() {
-  const backendUrl =
-    process.env.BACKEND_URL ||
-    process.env.API_BASE_URL ||
-    process.env.API_URL ||
-    `http://localhost:${process.env.PORT || 4607}`;
+function getAlipayConfig() { 
+  const frontendUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:3607';
   return {
     baseUrl: process.env.ALIPAY_BASE_URL || 'https://worker.gohire.top',
-    notifyUrl: process.env.ALIPAY_NOTIFY_URL || `${backendUrl}/api/v1/payment/callback`,
+    notifyUrl: `${frontendUrl}/api/v1/payment/callback`,
+    returnUrl: `${frontendUrl}/dashboard/account`,
   };
 }
 
@@ -282,8 +279,9 @@ router.post('/checkout/alipay', requireAuth, async (req, res) => {
       platform: 'gohire',
       package_data: packageData[tier],
       notify_url: alipayConfig.notifyUrl,
+      return_url: alipayConfig.returnUrl,
     };
-    console.log('Alipay request', alipayRequest);
+    console.log('Alipay request',process.env.STRIPE_TEST_MODE ,TEST_MODE, alipayRequest);
     const response = await fetch(`${alipayConfig.baseUrl}/payment/payment/create`, {
       method: 'POST',
       headers: {
@@ -409,7 +407,7 @@ router.post('/topup/alipay', requireAuth, async (req, res) => {
 
     const alipayRequest = {
       out_trade_no: outTradeNo,
-      total_amount: amount,
+      total_amount:  TEST_MODE ? 0.01 : amount,
       subject: `RoboHire Top-Up $${amount}`,
       pay_channel: 'alipay',
       user_name: user.name || user.email?.split('@')[0] || 'user',
@@ -424,6 +422,7 @@ router.post('/topup/alipay', requireAuth, async (req, res) => {
         package_info: JSON.stringify({ number: amount, description: '充值余额', msg: `充值$${amount}`, times: amount, type: 'topup' }),
       },
       notify_url: alipayConfig.notifyUrl,
+      return_url: alipayConfig.returnUrl,
     };
     console.log('Alipay topup request', alipayRequest);
 
